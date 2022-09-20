@@ -1,0 +1,34 @@
+{
+    "lobby": {
+      "title": "Lobby",
+      "create-game-button": "Create Game",
+      "data-table": {
+        "id": "ID",
+        "players": "Players",
+        "status": "Status"
+      }
+    },
+    "game": {
+        "waiting": {
+            "title": "Waiting Room",
+            "join-game-button": "Join Game",
+            "start-game-button": "Start Game",
+            "data-table": {
+                "display-name": "Display Name",
+                "color": "Color"
+            }
+        },
+        "started": {
+            "cancel-button": "Cancel",
+            "confirm-button": "Confirm",
+            "end-turn-button": "End Turn"
+        },
+        "finished": {
+            "title": "Game Result",
+            "data-table": {
+                "display-name": "Display Name",
+                "score": "Score"
+            }
+        }
+    }
+  }
