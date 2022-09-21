@@ -1,12 +1,12 @@
 {
     "lobby": {
-      "title": "Lobby",
-      "create-game-button": "Create Game",
-      "data-table": {
+        "title": "Lobby",
+        "create-game-button": "Create Game",
+        "data-table": {
         "id": "ID",
         "players": "Players",
         "status": "Status"
-      }
+        }
     },
     "game": {
         "waiting": {
@@ -31,4 +31,4 @@
             }
         }
     }
-  }
+}

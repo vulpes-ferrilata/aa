@@ -64,7 +64,7 @@ function Table(props: iProps) {
                         }
 
                         {props.player.resourceCards.map(resourceCard => (
-                            <div key={resourceCard.id} className="flex-content min-w-1/5 h-full z-0 last:flex-none sm:min-w-px" onClick={() => props.selectResourceCard && props.selectResourceCard(resourceCard)}>
+                            <div key={resourceCard.id} className="flex-content min-w-1/5 h-full z-0 last:flex-none sm:min-w-4" onClick={() => props.selectResourceCard && props.selectResourceCard(resourceCard)}>
                                 <div className={`h-full ${resourceCard.isSelected? "-translate-y-2": ""} ${props.action instanceof ToggleResourceCards && props.action.resourceCardIDs?.includes(resourceCard.id)? "animate-pulse": ""}`}>
                                     <ResourceCard type={resourceCard.type}/>
                                 </div>
@@ -85,7 +85,7 @@ function Table(props: iProps) {
 
             {
                 tab === "DEVELOPMENT_CARD"?
-                    <div className="flex-auto flex w-full p-2 overflow-y-hidden overflow-x-auto sm:w-auto sm:h-full sm:min-w-px">
+                    <div className="flex-auto flex w-full p-2 overflow-y-hidden overflow-x-auto sm:w-auto sm:h-full sm:min-w-4">
                             {props.player.developmentCards.map(developmentCard => (
                                 <div key={developmentCard.id} className="relative flex-content min-w-1/5 h-full z-0 last:flex-none" onClick={() => props.selectDevelopmentCard && props.selectDevelopmentCard(developmentCard)}>
                                     {

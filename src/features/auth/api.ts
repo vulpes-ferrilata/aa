@@ -1,9 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 type RegisterRequest = {
+    displayName: string;
     email: string;
     password: string;
-    displayName: string;
 }
 
 type LoginRequest = {
@@ -17,7 +17,7 @@ type Token = {
 }
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: `${process.env.GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/api/v1/auth`, 
+    baseUrl: `${process.env.REACT_APP_GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/api/v1/auth`, 
     prepareHeaders: (headers, {getState}) => {
         const language = localStorage.getItem("i18nextLng");
         if (language) {

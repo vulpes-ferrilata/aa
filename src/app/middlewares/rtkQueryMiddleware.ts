@@ -1,9 +1,9 @@
-import { isRejectedWithValue, nanoid } from '@reduxjs/toolkit'
+import { AnyAction, Dispatch, isRejectedWithValue, ThunkDispatch } from '@reduxjs/toolkit'
 import type { Middleware } from '@reduxjs/toolkit'
 
-import { Message, addMessage, deleteMessage } from 'features/messages/slice'
+import { addMessage } from 'features/messages/slice'
 
-const rtkQueryMiddleware: Middleware = api => next => action => {
+const rtkQueryMiddleware: Middleware<{}, any, Dispatch<AnyAction> & ThunkDispatch<any, undefined, AnyAction>> = api => next => action => {
     if (isRejectedWithValue(action)) {
         const details: string[] = []
 
@@ -19,15 +19,13 @@ const rtkQueryMiddleware: Middleware = api => next => action => {
             details.push("something went wrong")
         }
         
-        for (let detail of details) {
-            let message: Message = {
-                id: nanoid(),
-                detail: detail,
-            }
-    
-            api.dispatch(addMessage(message));
-
-            setTimeout(() => api.dispatch(deleteMessage(message.id)), 3000)
+        for (let detail of details) {    
+            api.dispatch(
+                addMessage({
+                    type: "ERROR", 
+                    detail: detail
+                })
+            );
         }
     }
 

@@ -1,0 +1,9 @@
+{
+    "required": "{{field}} is a required field",
+    "email": "{{field}} must be a valid email address",
+    "min-length_one": "{{field}} must be at least {{count}} character in length",
+    "min-length_other": "{{field}} must be at least {{count}} characters in length",
+    "max-length_one": "{{field}} must be a maximum of {{count}} character in length",
+    "max-length_other": "{{field}} must be a maximum of {{count}} characters in length",
+    "equal-field": "{{field}} must be equal to {{otherField}}"
+}

@@ -11,7 +11,7 @@ export type User = {
 }
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: `${process.env.GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/api/v1/user`, 
+    baseUrl: `${process.env.REACT_APP_GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/api/v1/user`, 
     prepareHeaders: (headers, {getState}) => {
         const language = localStorage.getItem("i18nextLng");
         if (language) {

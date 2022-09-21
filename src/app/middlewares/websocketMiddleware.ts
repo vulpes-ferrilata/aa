@@ -1,13 +1,14 @@
-import { createAction, isAnyOf } from '@reduxjs/toolkit'
+import { AnyAction, createAction, Dispatch, isAnyOf, ThunkDispatch } from '@reduxjs/toolkit'
 import type { Middleware } from '@reduxjs/toolkit'
-import {dial, NSConn, Message, OnNamespaceConnected, OnNamespaceDisconnect, Conn, OnRoomJoined, OnRoomLeft, Options} from 'neffos'
+import {dial, NSConn, Message, OnNamespaceConnected, OnNamespaceDisconnect, Conn, OnRoomJoined, OnRoomLeft, Options} from 'neffos';
 
-import catanAPI from 'features/catan/api'
-import { RootState } from 'app/store';
+import catanAPI from 'features/catan/api';
+import { addMessage } from 'features/messages/slice';
+import i18n from 'i18next'
 
 const connectWebsocket = createAction<undefined>("websocket/connect");
 
-const websocketMiddleware: Middleware = api => {
+const websocketMiddleware: Middleware<{}, any, Dispatch<AnyAction> & ThunkDispatch<any, undefined, AnyAction>> = api => {
     let catanNSConn: NSConn;
     return next => action => {
         if (connectWebsocket.match(action)) {
@@ -15,33 +16,65 @@ const websocketMiddleware: Middleware = api => {
                 reconnect: 1000,
             }
 
-            dial(`${process.env.GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/`.replace("http", "ws"), {
+            dial(`${process.env.REACT_APP_GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/`.replace("http", "ws"), {
                 "catan": {
                     [OnNamespaceConnected]: (nsConn: NSConn, message: Message) => {
                         if (nsConn.conn.wasReconnected()) {
-                            console.log("reconnected to namespace: " + message.Namespace);
+                            i18n.loadNamespaces("websocket", () => {
+                                api.dispatch(
+                                    addMessage({
+                                        type: "SUCCESS",
+                                        detail: i18n.t("websocket:reconnected-to-namespace", {namespace: message.Namespace})
+                                    })
+                                )
+                            });                            
                         } else {
-                            console.log("connected to namespace: " + message.Namespace);
+                            i18n.loadNamespaces("websocket", () => {
+                                api.dispatch(
+                                    addMessage({
+                                        type: "SUCCESS",
+                                        detail: i18n.t("websocket:connected-to-namespace", {namespace: message.Namespace})
+                                    })
+                                )
+                            });
                         }
                         catanNSConn = nsConn
                     },
                     [OnNamespaceDisconnect]: (nsConn: NSConn, message: Message) => {
-                        console.log("disconnected from namespace: " + message.Namespace);
+                        i18n.loadNamespaces("websocket", () => {
+                            api.dispatch(
+                                addMessage({
+                                    type: "ERROR",
+                                    detail: i18n.t("websocket:disconnected-from-namespace", {namespace: message.Namespace})
+                                })
+                            )
+                        });
                     },
                     [OnRoomJoined]: (nsConn: NSConn, message: Message) => {
-                        console.log("joined to room: " + message.Room);
+                        i18n.loadNamespaces("websocket", () => {
+                            api.dispatch(
+                                addMessage({
+                                    type: "SUCCESS",
+                                    detail: i18n.t("websocket:joined-to-room", {room: message.Room})
+                                })
+                            )
+                        });
                     },
                     [OnRoomLeft]: (nsConn: NSConn, message: Message) => {
-                        console.log("left from room: " + message.Room);
+                        i18n.loadNamespaces("websocket", () => {
+                            api.dispatch(
+                                addMessage({
+                                    type: "SUCCESS",
+                                    detail: i18n.t("websocket:left-from-room", {room: message.Room})
+                                })
+                            )
+                        });
                     },
                     "game:created": (nsConn: NSConn, message: Message) => {
                         api.dispatch(catanAPI.util.invalidateTags(["Games"]));
                     },
                     "game:updated": (nsConn: NSConn, message: Message) => {
-                        const room = message.Room;
-                        if (!!room) {
-                            api.dispatch(catanAPI.util.invalidateTags([{type: "Games", id:room}]));
-                        }
+                        api.dispatch(catanAPI.util.invalidateTags([{type: "Games", id:message.Room}]));
                     }
                 }
             }, options).then((conn: Conn) => {

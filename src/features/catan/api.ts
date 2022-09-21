@@ -284,7 +284,7 @@ export class PlayMonopolyCard {
 export type Action = BuildSettlementAndRoad | RollDices | MoveRobber | BuildSettlement | BuildRoad | UpgradeCity | BuyDevelopmentCard | ToggleResourceCards | MaritimeTrade | OfferTrading | PlayKnightCard | PlayRoadBuildingCard | PlayYearOfPlentyCard | PlayMonopolyCard
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: `${process.env.GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/api/v1/catan`, 
+    baseUrl: `${process.env.REACT_APP_GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/api/v1/catan`, 
     prepareHeaders: (headers, {getState}) => {
         const language = localStorage.getItem("i18nextLng");
         if (language) {

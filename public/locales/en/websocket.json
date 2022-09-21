@@ -1,0 +1,7 @@
+{
+    "reconnected-to-namespace": "reconnected to namespace: {{namespace}}",
+    "connected-to-namespace": "connected to namespace: {{namespace}}",
+    "disconnected-from-namespace": "disconnected from namespace: {{namespace}}",
+    "joined-to-room": "joined to room: {{room}}",
+    "left-from-room": "left from room: {{room}}"
+}
