@@ -21,14 +21,24 @@
         "started": {
             "cancel-button": "Cancel",
             "confirm-button": "Confirm",
-            "end-turn-button": "End Turn"
+            "end-turn-button": "End Turn",
+            "confirm-trading-dialog": {
+                "title": "Active player want to trade with you",
+                "cancel-button": "Cancel",
+                "confirm-button": "Confirm"
+            },
+            "resource-card-selection-dialog": {
+                "cancel-button": "Cancel",
+                "confirm-button": "Confirm"
+            }
         },
         "finished": {
-            "title": "Game Result",
+            "title": "Result",
             "data-table": {
                 "display-name": "Display Name",
                 "score": "Score"
-            }
+            },
+            "leave-game-button": "Leave Game"
         }
     }
 }

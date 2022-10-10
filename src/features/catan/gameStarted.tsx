@@ -1,20 +1,37 @@
-import { MapIcon, UserGroupIcon } from '@heroicons/react/24/outline';
-import DisplayName from 'features/user/displayName';
-import React, { useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import classNames from 'classnames';
 
-import { Action, BuildRoad, BuildSettlement, BuildSettlementAndRoad, BuyDevelopmentCard, Construction, Game, Land, MaritimeTrade, MoveRobber, OfferTrading, Path, Player, ResourceCard, ResourceCardType, RollDices, Terrain, ToggleResourceCards, UpgradeCity, useBuildRoadMutation, useBuildSettlementAndRoadMutation, useBuildSettlementMutation, useBuyDevelopmentCardMutation, useConfirmTradingMutation, useEndTurnMutation, useMaritimeTradeMutation, useMoveRobberMutation, useOfferTradingMutation, useRollDicesMutation, useToggleResourceCardsMutation, useUpgradeCityMutation, useCancelTradingMutation, usePlayKnightCardMutation, usePlayRoadBuildingCardMutation, usePlayYearOfPlentyCardMutation, usePlayMonopolyCardMutation, PlayKnightCard, PlayRoadBuildingCard, PlayYearOfPlentyCard, PlayMonopolyCard, DevelopmentCard, PlayerColor } from 'features/catan/api';
+import { ChatBubbleLeftRightIcon, MapIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+
+import { Action, BuildRoad, BuildSettlement, BuildSettlementAndRoad, BuyDevelopmentCard, Construction, Game, Land, MaritimeTrade, MoveRobber, OfferTrading, Path, Player, ResourceCard, ResourceCardType, Terrain, ToggleResourceCards, UpgradeCity, useBuildRoadMutation, useBuildSettlementAndRoadMutation, useBuildSettlementMutation, useBuyDevelopmentCardMutation, useConfirmTradeOfferMutation, useEndTurnMutation, useMaritimeTradeMutation, useMoveRobberMutation, useSendTradeOfferMutation, useRollDicesMutation, useToggleResourceCardsMutation, useUpgradeCityMutation, useCancelTradeOfferMutation, usePlayKnightCardMutation, usePlayRoadBuildingCardMutation, usePlayYearOfPlentyCardMutation, usePlayMonopolyCardMutation, PlayKnightCard, PlayRoadBuildingCard, PlayYearOfPlentyCard, PlayMonopolyCard, DevelopmentCard, PlayerColor } from 'features/catan/api';
+import userAPI from 'features/user/api';
 import Board from './board';
-import ConfirmTrading from './confirmTrading';
+import ConfirmTradeOffer from './confirmTradeOffer';
 import ResourceCardSelection from './resourceCardSelection';
 import Table from './table';
+import { AppDispatch } from 'app/store';
+import DisplayName from 'features/user/displayName';
+import MessageList from 'features/chat/messageList';
+import { addNotification, NotificationType } from 'features/notification/slice';
+import withMenubar from 'shared/hoc/withMenubar';
 
-interface iProps {
+interface IProps {
     game: Game;
-}
+    me?: Player;
+};
 
-type Tab = "MAP" | "PLAYERS"
+const enum Tab {
+    Map = "MAP",
+    Players = "PLAYERS",
+    Chat = "CHAT",
+};
 
-function GameStarted(props: iProps) {
+function GameStarted(props: IProps) {
+    const dispatch = useDispatch<AppDispatch>();
+    const {t} = useTranslation(["catan", "notification"]);
+
     const [buildSettlementAndRoad] = useBuildSettlementAndRoadMutation();
     const [rollDices] = useRollDicesMutation();
     const [moveRobber] = useMoveRobberMutation();
@@ -25,9 +42,9 @@ function GameStarted(props: iProps) {
     const [buyDevelopmentCard] = useBuyDevelopmentCardMutation();
     const [toggleResourceCards] = useToggleResourceCardsMutation();
     const [maritimeTrade] = useMaritimeTradeMutation();
-    const [offerTrading] = useOfferTradingMutation();
-    const [confirmTrading] = useConfirmTradingMutation();
-    const [cancelTrading] = useCancelTradingMutation();
+    const [sendTradeOffer] = useSendTradeOfferMutation();
+    const [confirmTradeOffer] = useConfirmTradeOfferMutation();
+    const [cancelTradeOffer] = useCancelTradeOfferMutation();
     const [playKnightCard] = usePlayKnightCardMutation();
     const [playRoadBuildingCard] = usePlayRoadBuildingCardMutation();
     const [playYearOfPlentyCard] = usePlayYearOfPlentyCardMutation();
@@ -35,18 +52,63 @@ function GameStarted(props: iProps) {
 
     const [action, setAction] = useState<Action>();
     const [isMapExpanded, setIsMapExpanded] = useState<boolean>(false);
-    const [tab, setTab] = useState<Tab>("MAP");
+    const [tab, setTab] = useState<Tab>(Tab.Map);
+    const [selectedPlayerID, setSelectedPlayerID] = useState<string>(props.me?.id?? props.game.activePlayer.id);
 
-    const player1 = useMemo(() => props.game.me?? props.game.players.find(player => player.turnOrder === 1), [props.game.me, props.game.players])
-    const player2 = useMemo(() => props.game.me? props.game.players.find(player => props.game.me && player.turnOrder === props.game.me.turnOrder+1)?? props.game.players.find(player => props.game.me && player.turnOrder === props.game.me.turnOrder-3): props.game.players.find(player => player.turnOrder === 2), [props.game.me, props.game.players])
-    const player3 = useMemo(() => props.game.me? props.game.players.find(player => props.game.me && player.turnOrder === props.game.me.turnOrder+2)?? props.game.players.find(player => props.game.me && player.turnOrder === props.game.me.turnOrder-2): props.game.players.find(player => player.turnOrder === 3), [props.game.me, props.game.players])
-    const player4 = useMemo(() => props.game.me? props.game.players.find(player => props.game.me && player.turnOrder === props.game.me.turnOrder+3)?? props.game.players.find(player => props.game.me && player.turnOrder === props.game.me.turnOrder-1): props.game.players.find(player => player.turnOrder === 4), [props.game.me, props.game.players])
+    useEffect(() => {
+        [props.game.activePlayer, ...props.game.players].forEach(async(player) => {
+            if (player === props.me) {
+                return;
+            }
 
-    const [selectedPlayerID, setSelectedPlayerID] = useState<string | undefined>(player1?.id);
+            let selectedResourceCards = player.resourceCards.filter(resourceCard => resourceCard.isSelected);
+
+            if (selectedResourceCards.length > 0) {
+                const translatedSelectedResourceCards = selectedResourceCards.map(selectedResourceCard => {
+                    switch (selectedResourceCard.type) {
+                        case "LUMBER":
+                            return t("notification:lumber");
+                        case "BRICK":
+                            return t("notification:brick");
+                        case "WOOL":
+                            return t("notification:wool");
+                        case "GRAIN":
+                            return t("notification:grain");
+                        case "ORE":
+                            return t("notification:ore");
+                    }
+                });
+
+                const result = await dispatch(userAPI.endpoints.getUser.initiate(player.userID));
+
+                const translatedDetail = t("notification:player-is-offering-resource-cards", {
+                    player: result.data?.displayName,
+                    resourceCards: translatedSelectedResourceCards,
+                });
+
+                dispatch(
+                    addNotification({
+                        type: NotificationType.Info,
+                        detail: translatedDetail,
+                    })
+                );
+            }
+        })
+    }, [props.game, props.me]);
+
+    const sortedPlayers = useMemo(() => {
+        const allPlayers = [props.game.activePlayer, ...props.game.players];
+        allPlayers.sort((a, b) => a.turnOrder - b.turnOrder);
+        //move yourself to first index
+        const myIdx = allPlayers.findIndex(player => player === props.me);
+        allPlayers.push(...allPlayers.splice(0, myIdx));
+        
+        return allPlayers;
+    }, [props.game, props.me]);
 
     const selectLand = (land: Land) => {
         setAction(action => {
-            if (!props.game.me || !props.game.me.isActive) {
+            if (props.game.activePlayer !== props.me) {
                 return action;
             }
 
@@ -66,7 +128,7 @@ function GameStarted(props: iProps) {
 
     const selectPath = (path: Path) => {
         setAction(action => {
-            if (!props.game.me || !props.game.me.isActive) {
+            if (props.game.activePlayer !== props.me) {
                 return action;
             }
             
@@ -88,23 +150,15 @@ function GameStarted(props: iProps) {
         });
     };
 
-    const selectDices = () => {
-        setAction(action => {
-            if (!props.game.me || !props.game.me.isActive) {
-                return action;
-            }
+    const selectDices = async() => {
+        await rollDices(props.game.id).unwrap();
 
-            if (props.game.turn > 2 && props.game.phase === "RESOURCE_PRODUCTION") {
-                return new RollDices(props.game.id);
-            }
-            
-            return action;
-        });
-    }
+        setAction(undefined);
+    };
 
     const selectConstruction = (construction: Construction) => {
         setAction(action => {
-            if (!props.game.me || !props.game.me.isActive) {
+            if (props.game.activePlayer !== props.me || !props.game.activePlayer.constructions.includes(construction)) {
                 return action;
             }
 
@@ -112,13 +166,13 @@ function GameStarted(props: iProps) {
                 return new UpgradeCity(props.game.id, construction.id);
             }
 
-            return action
+            return action;
         });
-    }
+    };
 
     const selectTerrain = (terrain: Terrain) => {
         setAction(action => {
-            if (!props.game.me || !props.game.me.isActive) {
+            if (props.game.activePlayer !== props.me) {
                 return action;
             }
 
@@ -130,29 +184,32 @@ function GameStarted(props: iProps) {
 
             return action;
         });
-    }
+    };
 
     const selectPlayer = (player: Player) => {        
         setAction(action => {
-            if (!props.game.me || !props.game.me.isActive || player.id === props.game.me.id) {
+            if (props.game.activePlayer !== props.me || player === props.me) {
                 return action;
             }
 
             if (action instanceof MoveRobber) {
+                setTab(Tab.Map);
                 return new MoveRobber(action.gameID, action.terrainID, player.id);
             } else if (action instanceof PlayKnightCard) {
+                setTab(Tab.Map);
                 return new PlayKnightCard(action.gameID, action.developmentCardID, action.terrainID, player.id);
             } else if (props.game.turn > 2 && props.game.phase === "RESOURCE_CONSUMPTION") {
+                setTab(Tab.Map);
                 return new OfferTrading(props.game.id, player.id);
             }
 
             return action;
         });
-    }
+    };
 
     const selectDevelopmentCardOnTable = (developmentCard: DevelopmentCard) => {
         setAction(action => {
-            if (!props.game.me || !props.game.me.isActive) {
+            if (props.game.activePlayer !== props.me) {
                 return action;
             }
 
@@ -185,11 +242,11 @@ function GameStarted(props: iProps) {
 
             return action;
         });
-    }
+    };
 
     const selectDevelopmentCardOnBoard = () => {
         setAction(action => {
-            if (!props.game.me || !props.game.me.isActive) {
+            if (props.game.activePlayer !== props.me) {
                 return action;
             }
 
@@ -199,17 +256,22 @@ function GameStarted(props: iProps) {
 
             return action;
         })
-    }
+    };
 
     const selectResourceCardOnTable = (resourceCard: ResourceCard) => {
         setAction(action => {
-            if (!props.game.me || !props.game.me.resourceCards.includes(resourceCard)) {
+            if (!props.me || !props.me.resourceCards.includes(resourceCard)) {
                 return action;
             }
 
             if (action instanceof ToggleResourceCards) {
                 const resourceCardIDSet = new Set(action.resourceCardIDs);
-                resourceCardIDSet.add(resourceCard.id);
+                if (resourceCardIDSet.has(resourceCard.id)) {
+                    resourceCardIDSet.delete(resourceCard.id);
+                } else {
+                    resourceCardIDSet.add(resourceCard.id);
+                }
+                
                 return new ToggleResourceCards(action.gameID, Array.from(resourceCardIDSet));
             } else if (props.game.turn > 2 && props.game.phase === "RESOURCE_CONSUMPTION") {
                 return new ToggleResourceCards(props.game.id, [resourceCard.id]);
@@ -217,11 +279,11 @@ function GameStarted(props: iProps) {
 
             return action;
         });
-    }
+    };
 
     const selectResourceCardOnBoard = (resourceCardType: ResourceCardType) => {
         setAction(action => {
-            if (!props.game.me || !props.game.me.isActive) {
+            if (props.game.activePlayer !== props.me) {
                 return action;
             }
 
@@ -235,7 +297,7 @@ function GameStarted(props: iProps) {
 
             return action;
         });
-    }
+    };
 
     const confirmAction = async() => {
         if (!action) {
@@ -245,9 +307,6 @@ function GameStarted(props: iProps) {
         switch (action.constructor) {
             case BuildSettlementAndRoad:
                 await buildSettlementAndRoad(action).unwrap();
-                break;
-            case RollDices:
-                await rollDices(action).unwrap();
                 break;
             case MoveRobber:
                 await moveRobber(action).unwrap();
@@ -271,7 +330,7 @@ function GameStarted(props: iProps) {
                 await maritimeTrade(action).unwrap();
                 break;
             case OfferTrading:
-                await offerTrading(action).unwrap();
+                await sendTradeOffer(action).unwrap();
                 break;
             case PlayKnightCard:
                 await playKnightCard(action).unwrap();
@@ -290,145 +349,172 @@ function GameStarted(props: iProps) {
         }
 
         setAction(undefined);
-    }
+    };
 
     const cancelAction = () => {
         setAction(undefined);
-    }
+    };
 
     const handleEndTurn = async() => {
-        if (!props.game.me || !props.game.me.isActive){
+        if (props.game.activePlayer !== props.me){
             return;
         }
 
         await endTurn(props.game.id).unwrap();
         setAction(undefined);
-    }
+    };
 
-    const handleConfirmTrading = async() => {
-        if (!props.game.me){
+    const handleConfirmTradeOffer = async() => {
+        if (!props.me){
             return;
         }
 
-        await confirmTrading(props.game.id).unwrap();
+        await confirmTradeOffer(props.game.id).unwrap();
         setAction(undefined);
-    }
+    };
 
-    const handleCancelTrading = async() => {
-        if (!props.game.me){
+    const handleCancelTradeOffer = async() => {
+        if (!props.me){
             return;
         }
 
-        await cancelTrading(props.game.id).unwrap();
+        await cancelTradeOffer(props.game.id).unwrap();
         setAction(undefined);
-    }
-
-    const getPlayerColor = (color: PlayerColor) => {
-        switch(color) {
-            case "RED":
-                return "text-red-600";
-            case "BLUE":
-                return "text-blue-600";
-            case "GREEN":
-                return "text-green-600";
-            case "YELLOW":
-                return "text-yellow-600";
-        }
-    }
+    };
 
     return (
-        <div className="flex flex-col w-full h-full sm:w-auto sm:m-auto sm:aspect-square">
-            <div className="flex-auto relative">
-                {
-                    props.game.me?.isOffered?
-                        <ConfirmTrading game={props.game} onConfirm={handleConfirmTrading} onCancel={handleCancelTrading}/>
-                    :
-                        null
-                }
+        <div className="flex flex-col w-full h-full dark:text-white">
+            <div className="relative flex w-full h-full">
+                <div className={classNames("relative w-full h-full sm-h-&-aspect-4/3:block sm-h-&-aspect-4/3:w-auto sm-h-&-aspect-4/3:m-auto sm-h-&-aspect-4/3:aspect-square", {
+                    "hidden": tab === Tab.Chat
+                })}>
+                    {
+                        props.me?.isOffered?
+                            <ConfirmTradeOffer game={props.game} me={props.me} confirmTradeOffer={handleConfirmTradeOffer} cancelTradeOffer={handleCancelTradeOffer}/>
+                        :
+                            null
+                    }
 
-                {
-                    (action instanceof PlayYearOfPlentyCard || action instanceof PlayMonopolyCard)?
-                        <ResourceCardSelection game={props.game} action={action} selectResourceCard={selectResourceCardOnBoard} onConfirm={confirmAction} onCancel={cancelAction}/>
-                    :
-                        null
-                } 
+                    {
+                        (action instanceof PlayYearOfPlentyCard || action instanceof PlayMonopolyCard)?
+                            <ResourceCardSelection game={props.game} action={action} selectResourceCard={selectResourceCardOnBoard} cancelAction={cancelAction} confirmAction={confirmAction}/>
+                        :
+                            null
+                    }
 
-                <div className={`absolute w-full h-full transition-all sm:block sm:w-6/8 sm:h-6/8 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:z-10 ${isMapExpanded? "sm:w-full sm:h-full" : ""} ${tab === "MAP"? "": "hidden"}`}>
-                    <Board game={props.game} 
-                    action={action} 
-                    isMapExpanded={isMapExpanded}
-                    selectLand={selectLand} 
-                    selectPath={selectPath}
-                    selectDices={selectDices}
-                    selectConstruction={selectConstruction}
-                    selectTerrain={selectTerrain}
-                    selectDevelopmentCard={selectDevelopmentCardOnBoard}
-                    selectResourceCard={selectResourceCardOnBoard}
-                    confirmAction={confirmAction}
-                    cancelAction={cancelAction}
-                    endTurn={handleEndTurn}
-                    toggleMapExpanded={() => setIsMapExpanded(isMapExpanded => !isMapExpanded)}/>
+                    <div className={classNames("absolute w-full h-full transition-all sm-h-&-aspect-4/3:block sm-h-&-aspect-4/3:w-6/8 sm-h-&-aspect-4/3:h-6/8 sm-h-&-aspect-4/3:top-1/2 sm-h-&-aspect-4/3:left-1/2 sm-h-&-aspect-4/3:-translate-x-1/2 sm-h-&-aspect-4/3:-translate-y-1/2 sm-h-&-aspect-4/3:z-10", {
+                        "sm-h-&-aspect-4/3:w-full sm-h-&-aspect-4/3:h-full": isMapExpanded, 
+                        "hidden": tab !== Tab.Map
+                    })}>
+                        <Board game={props.game} 
+                        me={props.me}
+                        action={action} 
+                        isMapExpanded={isMapExpanded}
+                        selectLand={selectLand} 
+                        selectPath={selectPath}
+                        selectDices={selectDices}
+                        selectConstruction={selectConstruction}
+                        selectTerrain={selectTerrain}
+                        selectDevelopmentCard={selectDevelopmentCardOnBoard}
+                        selectResourceCard={selectResourceCardOnBoard}
+                        confirmAction={confirmAction}
+                        cancelAction={cancelAction}
+                        endTurn={handleEndTurn}
+                        toggleMapExpanded={() => setIsMapExpanded(isMapExpanded => !isMapExpanded)}/>
+                    </div>
+
+                    <div className={classNames("absolute flex flex-col w-full h-full top-0 left-0 sm-h-&-aspect-4/3:flex", {
+                        "sm-h-&-aspect-4/3:hidden": isMapExpanded, 
+                        "hidden": tab !== Tab.Players
+                    })}>
+                        <div className="flex-auto relative w-full">
+                            {sortedPlayers.map((player, idx) => {
+                                const tablePosition = ((idx: number) => {
+                                    switch (idx) {
+                                        case 0:
+                                            return "sm-h-&-aspect-4/3:block sm-h-&-aspect-4/3:w-7/8 sm-h-&-aspect-4/3:h-1/8 sm-h-&-aspect-4/3:right-0 sm-h-&-aspect-4/3:bottom-0";
+                                        case 1:
+                                            return "sm-h-&-aspect-4/3:block sm-h-&-aspect-4/3:w-7/8 sm-h-&-aspect-4/3:h-1/8 sm-h-&-aspect-4/3:origin-bottom-left sm-h-&-aspect-4/3:rotate-90";
+                                        case 2:
+                                            return "sm-h-&-aspect-4/3:block sm-h-&-aspect-4/3:w-7/8 sm-h-&-aspect-4/3:h-1/8 sm-h-&-aspect-4/3:rotate-180";
+                                        case 3:
+                                            return "sm-h-&-aspect-4/3:block sm-h-&-aspect-4/3:w-7/8 sm-h-&-aspect-4/3:h-1/8 sm-h-&-aspect-4/3:right-0 sm-h-&-aspect-4/3:origin-bottom-right sm-h-&-aspect-4/3:-translate-y-full sm-h-&-aspect-4/3:-rotate-90";
+                                    }
+                                })(idx);                                
+
+                                return (
+                                    <div key={player.id} className={classNames("absolute w-full h-full dark:bg-slate-800", tablePosition, {
+                                        "hidden": player.id !== selectedPlayerID
+                                    })}>
+                                        <Table game={props.game} me={props.me} player={player} action={action} selectPlayer={() => selectPlayer(player)} selectResourceCard={selectResourceCardOnTable} selectDevelopmentCard={selectDevelopmentCardOnTable}/>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div className="flex sm-h-&-aspect-4/3:hidden dark:bg-slate-900">
+                            {sortedPlayers.map(player => {
+                                const playerColor = ((playerColor: PlayerColor) => {
+                                    switch(playerColor) {
+                                        case "RED":
+                                            return "text-red-600";
+                                        case "BLUE":
+                                            return "text-blue-600";                                            
+                                        case "GREEN":
+                                            return "text-green-600";                                            
+                                        case "YELLOW":
+                                            return "text-yellow-600";
+                                    }
+                                })(player.color)                      
+                                
+                                return (
+                                    <div key={player.id} className={classNames("flex-auto flex p-2 border-t-2 border-slate-200 overflow-hidden shadow-inner-lg transition-all dark:border-slate-600", playerColor, {
+                                        "shadow-green-500": player === props.game.activePlayer, 
+                                        "!border-blue-400 dark:!border-blue-600": player.id === selectedPlayerID,
+                                    })}
+                                    onClick={() => setSelectedPlayerID(player.id)}>
+                                        <DisplayName id={player.userID}/>
+                                    </div>
+                                )
+                            })}                            
+                        </div>
+                    </div>
                 </div>
 
-                <div className={`absolute flex flex-col w-full h-full top-0 left-0 bg-white sm:flex sm:bg-transparent ${isMapExpanded? "sm:hidden" : ""} ${tab === "PLAYERS"? "": "hidden"}`}>
-                    <div className="flex border-b border-gray-200 gap-4 sm:hidden">
-                        {([player1, player2, player3, player4] as Player[]).map(player => {
-                            if (!player) {
-                                return null;
-                            }
-                            
-                            return (
-                                <div key={player.id} className={`flex w-1/4 p-2 border-b-2 overflow-hidden ${getPlayerColor(player.color)} ${player.isActive? "shadow-inner-lg shadow-green-500": ""} ${selectedPlayerID === player.id? "border-blue-400": "border-transparent"}`} onClick={() => setSelectedPlayerID(player.id)}>
-                                    <DisplayName id={player.userID}/>
-                                </div>
-                            )
-                        })}                            
-                    </div>
-
-                    <div className="flex-auto relative w-full">
-                        {([player1, player2, player3, player4] as Player[]).map(player => {
-                            if (!player) {
-                                return null;
-                            }
-
-                            let className;
-
-                            switch (player) {
-                                case player1:
-                                    className = "sm:block sm:w-7/8 sm:h-1/8 sm:right-0 sm:bottom-0";
-                                    break;
-                                case player2:
-                                    className = "sm:block sm:w-7/8 sm:h-1/8 sm:origin-bottom-left sm:rotate-90";
-                                    break;
-                                case player3:
-                                    className = "sm:block sm:w-7/8 sm:h-1/8 sm:rotate-180";
-                                    break;
-                                case player4:
-                                    className = "sm:block sm:w-7/8 sm:h-1/8 sm:right-0 sm:origin-bottom-right sm:-translate-y-full sm:-rotate-90";
-                                    break;
-                            }
-
-                            return (
-                                <div key={player.id} className={`absolute w-full h-full ${className} ${selectedPlayerID !== player.id? "hidden": ""}`}>
-                                    <Table game={props.game} player={player} action={action} selectPlayer={() => selectPlayer(player)} selectResourceCard={selectResourceCardOnTable} selectDevelopmentCard={selectDevelopmentCardOnTable}/>
-                                </div>
-                            );
-                        })}
-                    </div>
+                <div className={classNames("flex-auto absolute w-full h-full sm-h-&-aspect-4/3:static sm-h-&-aspect-4/3:block sm-h-&-aspect-4/3:w-auto sm-h-&-aspect-4/3:h-auto dark:bg-slate-900", {
+                    "hidden": tab !== Tab.Chat
+                })}>
+                    <MessageList roomID={props.game.id}/>
                 </div>
             </div>
             
-            <div className="flex h-12 border-t border-gray-200 gap-4 sm:hidden">
-                <div className={`flex w-1/2 p-2 border-t-2 border-transparent text-gray-500 overflow-hidden ${tab === "MAP"? "!border-blue-400": ""}`} onClick={() => setTab("MAP")}>
+            <div className="flex h-12 sm-h-&-aspect-4/3:hidden dark:bg-slate-900">
+                <div className={classNames("flex-auto flex flex-col p-2 border-t-2 border-slate-200 overflow-hidden transition-all dark:border-slate-600", {
+                    "!border-blue-400 dark:!border-blue-600": tab === Tab.Map
+                })}
+                onClick={() => setTab(Tab.Map)}>
                     <MapIcon className="mx-auto"/>
                 </div>
 
-                <div className={`flex w-1/2 p-2 border-t-2 overflow-hidden ${tab === "PLAYERS"? "border-blue-400": "border-transparent"} ${props.game.me?.isActive? "text-green-500": "text-gray-500"}`} onClick={() => setTab("PLAYERS")}>
+                <div className={classNames("flex-auto flex flex-col p-2 border-t-2 border-slate-200 overflow-hidden transition-all dark:border-slate-600", {
+                    "border-blue-400 dark:!border-blue-600": tab === Tab.Players, 
+                    "text-green-600": props.me === props.game.activePlayer
+                })} onClick={() => setTab(Tab.Players)}>
                     <UserGroupIcon className="mx-auto"/>
                 </div>
+
+                <div className={classNames("flex-auto flex flex-col p-2 border-t-2 border-slate-200 overflow-hidden transition-all dark:border-slate-600", {
+                    "border-blue-400 dark:!border-blue-600": tab === Tab.Chat
+                })}
+                onClick={() => setTab(Tab.Chat)}>
+                    <ChatBubbleLeftRightIcon className="mx-auto"/>
+                </div>
             </div>
-        </div>  
+        </div>
     );
 }
 
-export default GameStarted;
+export default withMenubar<IProps>(memo(GameStarted, (prevProps, nextProps) => {
+    return prevProps.game === nextProps.game &&
+    prevProps.me === nextProps.me;
+}));

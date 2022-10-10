@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ResourceCardType } from 'features/catan/api';
 
-export interface iProps {
+interface IProps {
     type: ResourceCardType;
-}
+};
 
-function ResourceCard(props: iProps) {
+function ResourceCard(props: IProps) {
     const [src, setSrc] = useState<string>();
     
     useEffect(() => {
@@ -29,7 +29,7 @@ function ResourceCard(props: iProps) {
                 import('assets/images/resource-hidden.png').then(image => setSrc(image.default));
                 break;
         }
-    }, [props.type])
+    }, [props.type]);
 
     const alt = useMemo(() => {
         switch (props.type) {
@@ -46,7 +46,7 @@ function ResourceCard(props: iProps) {
             case "HIDDEN":
                 return "hidden resource card";
         }
-    }, [props.type])
+    }, [props.type]);
 
     return (
         <div className="h-full aspect-2/3">

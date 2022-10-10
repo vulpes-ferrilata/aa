@@ -6,14 +6,14 @@ import authApi from 'features/auth/api'
 
 type GameCreated = {
     id: string;
-}
+};
 
 export type Game = {
     id: string;
     status: GameStatus;
     phase: GamePhase;
     turn: number;
-    me?: Player;
+    activePlayer: Player;
     players: Player[];
     dices: Dice[];
     achievements: Achievement[];
@@ -22,7 +22,7 @@ export type Game = {
     terrains: Terrain[];
     lands: Land[];
     paths: Path[];
-}
+};
 
 type GameStatus = "WAITING" | "STARTED" | "FINISHED";
 
@@ -34,26 +34,25 @@ export type Player = {
     color: PlayerColor;
     turnOrder: number;
     isOffered: boolean;
-    isActive: boolean;
     score: number;
     achievements: Achievement[];
     resourceCards: ResourceCard[];
     developmentCards: DevelopmentCard[];
     constructions: Construction[];
     roads: Road[];
-}
+};
 
 export type PlayerColor = "RED" | "BLUE" | "GREEN" | "YELLOW";
 
 export type Dice = {
     id: string;
     number: number;
-}
+};
 
 type Achievement = {
     id: string;
     type: AchievementType;
-}
+};
 
 export type AchievementType = "LONGEST_ROAD" | "LARGEST_ARMY";
 
@@ -61,7 +60,7 @@ export type ResourceCard = {
     id: string;
     type: ResourceCardType;
     isSelected: boolean;
-}
+};
 
 export type ResourceCardType = "LUMBER" | "BRICK" | "WOOL" | "GRAIN" | "ORE" | "HIDDEN";
 
@@ -69,7 +68,7 @@ export type DevelopmentCard = {
     id: string;
     type: DevelopmentCardType;
     status: DevelopmentCardStatus;
-}
+};
 
 export type DevelopmentCardType = "KNIGHT" | "MONOPOLY" | "ROAD_BUILDING" | "YEAR_OF_PLENTY" | "VICTORY_POINTS" | "HIDDEN";
 
@@ -83,7 +82,7 @@ export type Terrain = {
     type: TerrainType;
     harbor?: Harbor;
     robber?: Robber;
-}
+};
 
 export type TerrainType = "FOREST" | "HILL" | "FIELD" | "PASTURE" | "MOUNTAIN" | "DESERT";
 
@@ -92,20 +91,20 @@ export type Harbor = {
     q: number;
     r: number;
     type: HarborType;
-}
+};
 
 export type HarborType = "LUMBER" | "BRICK" | "WOOL" | "GRAIN" | "ORE" | "GENERAL";
 
 export type Robber = {
     id: string;
-}
+};
 
 export type Land = {
     id: string;
     q: number;
     r: number;
     location: LandLocation;
-}
+};
 
 export type LandLocation = "TOP" | "BOTTOM";
 
@@ -114,20 +113,20 @@ export type Path = {
     q: number;
     r: number;
     location: PathLocation;
-}
+};
 
 export type Construction = {
     id: string;
     type: ConstructionType;
     land?: Land;
-}
+};
 
 export type ConstructionType = "SETTLEMENT" | "CITY";
 
 type Road = {
     id: string;
     path?: Path;
-}
+};
 
 export type PathLocation = "TOP_LEFT" | "MIDDLE_LEFT" | "BOTTOM_LEFT";
 
@@ -140,14 +139,6 @@ export class BuildSettlementAndRoad {
         this.gameID = gameID;
         this.landID = landID;
         this.pathID = pathID;
-    }
-}
-
-export class RollDices {
-    gameID?: string;
-
-    constructor(gameID?: string) {
-        this.gameID = gameID;
     }
 }
 
@@ -281,7 +272,7 @@ export class PlayMonopolyCard {
     }
 }
 
-export type Action = BuildSettlementAndRoad | RollDices | MoveRobber | BuildSettlement | BuildRoad | UpgradeCity | BuyDevelopmentCard | ToggleResourceCards | MaritimeTrade | OfferTrading | PlayKnightCard | PlayRoadBuildingCard | PlayYearOfPlentyCard | PlayMonopolyCard
+export type Action = BuildSettlementAndRoad | MoveRobber | BuildSettlement | BuildRoad | UpgradeCity | BuyDevelopmentCard | ToggleResourceCards | MaritimeTrade | OfferTrading | PlayKnightCard | PlayRoadBuildingCard | PlayYearOfPlentyCard | PlayMonopolyCard
 
 const baseQuery = fetchBaseQuery({
     baseUrl: `${process.env.REACT_APP_GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/api/v1/catan`, 
@@ -346,8 +337,8 @@ const api = createApi({
             ]
         }),
         getGame: builder.query<Game, string>({
-            query: (gameID: string) => ({
-                url: `/${gameID}`,
+            query: (id: string) => ({
+                url: `/${id}`,
                 method: "GET",
             }),
             providesTags: (game, error, args) => [{type: "Games", id: args}]
@@ -384,12 +375,12 @@ const api = createApi({
             }),
             invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
         }),
-        rollDices: builder.mutation<void, RollDices>({
-            query: (rollDices: RollDices) => ({
-                url: `/${rollDices.gameID}/roll-dices`,
+        rollDices: builder.mutation<void, string>({
+            query: (gameID: string) => ({
+                url: `/${gameID}/roll-dices`,
                 method: "POST",
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "Games", id: args}]
         }),
         moveRobber: builder.mutation<void, MoveRobber>({
             query: (moveRobber: MoveRobber) => ({
@@ -466,9 +457,9 @@ const api = createApi({
             }),
             invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
         }),
-        offerTrading: builder.mutation<void, OfferTrading>({
+        sendTradeOffer: builder.mutation<void, OfferTrading>({
             query: (offerTrading: OfferTrading) => ({
-                url: `/${offerTrading.gameID}/offer-trading`,
+                url: `/${offerTrading.gameID}/send-trade-offer`,
                 method: "POST",
                 body: {
                     playerID: offerTrading.playerID,
@@ -476,16 +467,16 @@ const api = createApi({
             }),
             invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
         }),
-        confirmTrading: builder.mutation<void, string>({
+        confirmTradeOffer: builder.mutation<void, string>({
             query: (gameID: string) => ({
-                url: `/${gameID}/confirm-trading`,
+                url: `/${gameID}/confirm-trade-offer`,
                 method: "POST",
             }),
             invalidatesTags: (data, error, args) => [{type: "Games", id: args}]
         }),
-        cancelTrading: builder.mutation<void, string>({
+        cancelTradeOffer: builder.mutation<void, string>({
             query: (gameID: string) => ({
-                url: `/${gameID}/cancel-trading`,
+                url: `/${gameID}/cancel-trade-offer`,
                 method: "POST",
             }),
             invalidatesTags: (data, error, args) => [{type: "Games", id: args}]
@@ -552,11 +543,11 @@ export const {
     useBuyDevelopmentCardMutation,
     useToggleResourceCardsMutation,
     useMaritimeTradeMutation,
-    useOfferTradingMutation,
-    useConfirmTradingMutation,
-    useCancelTradingMutation,
+    useSendTradeOfferMutation,
+    useConfirmTradeOfferMutation,
+    useCancelTradeOfferMutation,
     usePlayKnightCardMutation,
     usePlayRoadBuildingCardMutation,
     usePlayYearOfPlentyCardMutation,
     usePlayMonopolyCardMutation
-} = api
+} = api;

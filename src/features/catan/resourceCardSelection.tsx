@@ -1,20 +1,26 @@
-import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
-import React from 'react'
+import React, { memo } from 'react'
+import { useTranslation } from 'react-i18next';
+
 import { Action, Game, PlayMonopolyCard, PlayYearOfPlentyCard, ResourceCardType } from 'features/catan/api';
+
+import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
+
 import ResourceCard from './resourceCard';
 
-interface iProps {
+interface IProps {
     game: Game;
     action?: Action;
     selectResourceCard: (resourceCardType: ResourceCardType) => void;
-    onConfirm: () => void;
-    onCancel: () => void;
-}
+    cancelAction: () => void;
+    confirmAction: () => void;
+};
 
-function ResourceCardSelection(props: iProps) {
+function ResourceCardSelection(props: IProps) {
+    const {t} = useTranslation("catan");
+
     return (
-        <div className="absolute flex left-0 top-0 w-full h-full bg-black/10 z-50">
-            <div className="flex flex-col max-w-full m-auto p-8 rounded-md shadow-lg bg-white">
+        <div className="absolute flex left-0 top-0 w-full h-full bg-black/10 z-30">
+            <div className="flex flex-col max-w-full m-auto p-8 rounded-md shadow-lg bg-white gap-4 dark:bg-slate-900">
                 <div className="grid grid-cols-5 gap-2">
                     {(["LUMBER", "BRICK", "WOOL", "GRAIN", "ORE"] as ResourceCardType[]).map((resourceCardType, i) => (
                         <div key={i} className="flex flex-col h-full" onClick={() => props.selectResourceCard(resourceCardType)}>
@@ -45,13 +51,29 @@ function ResourceCardSelection(props: iProps) {
                     ))}
                 </div>
 
-                <div className="mx-auto mt-2">
-                    <input type="button" className="px-2 py-1 rounded-md shadow-lg shadow-red-500/50 bg-red-500 text-white cursor-pointer hover:shadow-md hover:shadow-red-400/50 hover:bg-red-400 active:shadow-lg active:shadow-red-500/50 active:bg-red-500" value="Cancel" onClick={props.onCancel}/>
-                    <input type="button" className="ml-2 px-2 py-1 rounded-md shadow-lg shadow-blue-500/50 bg-blue-500 text-white cursor-pointer hover:shadow-md hover:shadow-blue-400/50 hover:bg-blue-400 active:shadow-lg active:shadow-blue-500/50 active:bg-blue-500" value="Confirm" onClick={props.onConfirm}/>
+                <div className="flex mx-auto gap-4">
+                    <input 
+                    type="button" 
+                    className="px-2 py-1 rounded-md shadow-md bg-red-500 text-white cursor-pointer 
+                    hover:shadow-lg hover:bg-red-400 active:shadow-md active:bg-red-500 
+                    dark:bg-red-900 dark:hover:bg-red-800 dark:active:bg-red-900"
+                    value={t("game.started.resource-card-selection-dialog.cancel-button")}
+                    onClick={() => props.cancelAction()}/>
+                    
+                    <input 
+                    type="button" 
+                    className="px-2 py-1 rounded-md shadow-md bg-green-500 text-white cursor-pointer 
+                    hover:shadow-lg hover:bg-green-400 active:shadow-md active:bg-green-500 
+                    dark:bg-green-900 dark:hover:bg-green-800 dark:active:bg-green-900"
+                    value={t("game.started.resource-card-selection-dialog.confirm-button")}
+                    onClick={() => props.confirmAction()}/>
                 </div>
             </div>
         </div>
     )
 }
 
-export default ResourceCardSelection;
+export default memo(ResourceCardSelection, (prevProps, nextProps) => {
+    return prevProps.game === nextProps.game &&
+    prevProps.action === nextProps.action;
+});

@@ -1,8 +1,8 @@
-import React from 'react'
+import React from 'react';
 
-interface iProps {}
+interface IProps {};
 
-function Loading(iProps: iProps) {
+function Loading(IProps: IProps) {
     return (
         <div className="fixed flex left-0 top-0 w-screen h-screen">
             <div className="flex m-auto items-center justify-center space-x-2 animate-pulse">
@@ -11,7 +11,6 @@ function Loading(iProps: iProps) {
                 <div className="w-8 h-8 bg-blue-500 rounded-full"></div>
             </div>
         </div>
-        
     );
 }
 

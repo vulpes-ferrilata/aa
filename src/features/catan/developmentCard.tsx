@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { DevelopmentCardType } from 'features/catan/api';
 
-export interface iProps {
+export interface IProps {
     type: DevelopmentCardType;
-}
+};
 
-function ResourceCard(props: iProps) {
+function ResourceCard(props: IProps) {
     const [src, setSrc] = useState<string>();
     
     useEffect(() => {

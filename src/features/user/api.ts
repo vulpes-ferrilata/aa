@@ -1,14 +1,13 @@
-import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
-import { RootState } from 'app/store'
+import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
+import { Mutex } from 'async-mutex';
 
-import { Mutex } from 'async-mutex'
-
-import authApi from 'features/auth/api'
+import { RootState } from 'app/store';
+import authApi from 'features/auth/api';
 
 export type User = {
     id: string;
     displayName: string;
-}
+};
 
 const baseQuery = fetchBaseQuery({
     baseUrl: `${process.env.REACT_APP_GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/api/v1/user`, 
@@ -60,6 +59,12 @@ const api = createApi({
     reducerPath: "userAPI",
     baseQuery: baseQueryWithReAuthentication,
     endpoints: builder => ({
+        getMe: builder.query<User, void>({
+            query: () => ({
+                url: "/me",
+                method: "GET"
+            })
+        }),
         getUser: builder.query<User, string>({
             query: (userID: string) => ({
                 url: `/${userID}`,
@@ -71,4 +76,4 @@ const api = createApi({
 
 export default api;
 
-export const { useGetUserQuery } = api
+export const { useGetMeQuery, useGetUserQuery } = api;

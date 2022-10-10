@@ -1,20 +1,24 @@
-import React, { useEffect, lazy, Suspense } from 'react'
-import {useRoutes, Navigate } from 'react-router-dom'
+import React, { useEffect, lazy, Suspense } from 'react';
+import {useRoutes, Navigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import classNames from 'classnames';
 
-import Loading from 'shared/components/loading'
-import { useDispatch } from 'react-redux'
-import { connectWebsocket } from 'app/middlewares/websocketMiddleware'
-import withAuthentication from 'shared/hoc/withAuthentication'
+import { RootState } from 'app/store';
+import Loading from 'shared/components/loading';
+import { connectWebsocket } from 'app/middlewares/websocketMiddleware';
+import withAuthentication from 'shared/hoc/withAuthentication';
+import { ColorScheme } from 'features/colorScheme/slice';
 
-const MessageList = lazy(() => import('features/messages/messageList'))
-const Login = lazy(() => import('features/auth/login'))
-const Register = lazy(() => import('features/auth/register'))
+const NotificationList = lazy(() => import('features/notification/notificationList'));
+const Login = lazy(() => import('features/auth/login'));
+const Register = lazy(() => import('features/auth/register'));
 
-const Lobby = withAuthentication(lazy(() => import('features/catan/lobby')))
-const Game = withAuthentication(lazy(() => import('features/catan/game')))
+const LobbyWithAuthentication = withAuthentication(lazy(() => import('features/catan/lobby')));
+const GameWithAuthentication = withAuthentication(lazy(() => import('features/catan/game')));
 
 function App() {
   const dispatch = useDispatch();
+  const colorScheme = useSelector<RootState, ColorScheme>(state => state.colorScheme);
 
   const routes = useRoutes([
     {
@@ -31,31 +35,33 @@ function App() {
     },
     {
       path: "/lobby",
-      element: <Lobby/>,
+      element: <LobbyWithAuthentication/>,
     },
     {
       path: "/game/:id",
-      element: <Game/>,
+      element: <GameWithAuthentication/>,
     }
   ]);
 
   useEffect(() => {
     dispatch(connectWebsocket());
-  }, [])
+  }, []);
   
   return (    
-    <div className="flex w-full h-full select-none">
-      <Suspense fallback={<Loading/>}>
-        <div className="fixed left-1/2 w-full -translate-x-1/2 z-50">
-          <MessageList/>
-        </div>
-      
-        {routes}
-      </Suspense>
+    <div className={classNames("w-full h-full", {
+      "dark": colorScheme === ColorScheme.Dark
+    })}>
+      <div className="flex w-full h-full dark:bg-black dark:text-white dark:shadow-white/10">
+        <Suspense fallback={<Loading/>}>
+          <div className="fixed left-1/2 -translate-x-1/2 z-50">
+            <NotificationList/>
+          </div>
+        
+          {routes}
+        </Suspense>
+      </div>
     </div>
   );
 }
-
-
 
 export default App;

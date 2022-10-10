@@ -1,0 +1,9 @@
+{
+    "required": "{{field}} là trường thông tin bắt buộc",
+    "email": "{{field}} phải là email hợp lệ",
+    "min-length_one": "{{field}} phải có ít nhất {{count}} kí tự",
+    "min-length_other": "{{field}} phải có ít nhất {{count}} kí tự",
+    "max-length_one": "{{field}} phải có ít hơn {{count}} kí tự",
+    "max-length_other": "{{field}} phải có ít hơn {{count}} kí tự",
+    "equal-field": "{{field}} phải giống với {{otherField}}"
+}

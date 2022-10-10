@@ -23,3 +23,7 @@ html, body, div#root {
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(148, 163, 184);
 }
+
+.dark * {
+  color-scheme: dark;
+}

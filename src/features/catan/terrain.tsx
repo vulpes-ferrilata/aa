@@ -1,17 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 
-import Hex, { IProps as IHexProps } from './hex';
+import Hex from './hex';
 
-import { Action, Robber, Terrain as TerrainModel } from 'features/catan/api';
+import { Action, Game, Robber, Terrain as TerrainModel } from 'features/catan/api';
 
-interface iProps {
+interface IProps {
+    game: Game;
     terrain: TerrainModel;
     robber?: Robber;
     action?: Action;
     onClick: () => void;
-}
+};
 
-function Terrain(props: iProps & IHexProps) {
+function Terrain(props: IProps) {
     const [src, setSrc] = useState<string>();
     const [robberSrc, setRobberSrc] = useState<string>();
 
@@ -56,7 +57,7 @@ function Terrain(props: iProps & IHexProps) {
     }, [props.terrain.type]);
 
     useEffect(() => {
-        import("assets/images/robber.webp").then(image => setRobberSrc(image.default));
+        import("assets/images/robber.png").then(image => setRobberSrc(image.default));
     }, [])
 
     const robberAlt = useMemo(() => {
@@ -65,9 +66,9 @@ function Terrain(props: iProps & IHexProps) {
 
     return (
         <Hex game={props.game} q={props.terrain.q} r={props.terrain.r}>
-            <div className="w-full h-full rotate-[240deg] overflow-hidden">
-                <div className="w-full h-full rotate-[60deg] overflow-hidden">
-                    <div className="relative w-full h-full rotate-[60deg] pointer-events-auto" onClick={props.onClick}>
+            <div className="w-full h-full -rotate-120 overflow-hidden">
+                <div className="w-full h-full rotate-60 overflow-hidden">
+                    <div className="relative w-full h-full rotate-60 pointer-events-auto" onClick={props.onClick}>
                         {
                             src?
                                 <img src={src} alt={alt} className="max-h-full"/>
@@ -75,7 +76,7 @@ function Terrain(props: iProps & IHexProps) {
                                 <div className="w-full h-full bg-slate-100 animate-pulse"/>
                         }
 
-                        <div className="absolute flex h-1/2 top-1/2 left-1/2 aspect-square bg-white rounded-full shadow-inner-lg -translate-x-1/2 -translate-y-1/2">
+                        <div className="absolute flex h-1/2 top-1/2 left-1/2 aspect-square bg-white text-black rounded-full shadow-inner-lg shadow-black/50 -translate-x-1/2 -translate-y-1/2">
                             <div className="m-auto">
                                 <label>{props.terrain.number}</label>
                             </div>
@@ -105,4 +106,9 @@ function Terrain(props: iProps & IHexProps) {
     );
 }
 
-export default Terrain;
+export default memo(Terrain, (prevProps, nextProps) => {
+    return prevProps.game === nextProps.game && 
+    prevProps.terrain === nextProps.terrain && 
+    prevProps.robber === nextProps.robber &&
+    prevProps.action === nextProps.action;
+});

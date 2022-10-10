@@ -1,0 +1,44 @@
+{
+    "lobby": {
+        "title": "Sảnh",
+        "create-game-button": "Tạo trò chơi",
+        "data-table": {
+        "id": "ID",
+        "players": "Người chơi",
+        "status": "Trạng thái"
+        }
+    },
+    "game": {
+        "waiting": {
+            "title": "Phòng chờ",
+            "join-game-button": "Tham gia trò chơi",
+            "start-game-button": "Bắt đầu trò chơi",
+            "data-table": {
+                "display-name": "Tên hiển thị",
+                "color": "Màu"
+            }
+        },
+        "started": {
+            "cancel-button": "Hủy",
+            "confirm-button": "Xác nhận",
+            "end-turn-button": "Kết thúc lượt",
+            "confirm-trading-dialog": {
+                "title": "Người chơi trong lượt muốn trao đổi với bạn",
+                "cancel-button": "Hủy",
+                "confirm-button": "Xác nhận"
+            },
+            "resource-card-selection-dialog": {
+                "cancel-button": "Cancel",
+                "confirm-button": "Confirm"
+            }
+        },
+        "finished": {
+            "title": "Kết quả",
+            "data-table": {
+                "display-name": "Tên hiển thị",
+                "score": "Điểm"
+            },
+            "leave-game-button": "Rời khỏi trò chơi"
+        }
+    }
+}

@@ -1,20 +1,21 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {Link, useNavigate} from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { SubmitHandler } from 'react-hook-form/dist/types';
+import { ErrorMessage } from '@hookform/error-message';
 
 import {KeyIcon, EnvelopeIcon} from '@heroicons/react/24/outline';
 
 import { useLoginMutation } from 'features/auth/api';
-import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
-import { SubmitHandler } from 'react-hook-form/dist/types';
-import { ErrorMessage } from '@hookform/error-message';
+import withMenubar from 'shared/hoc/withMenubar';
 
-interface IProps {}
+interface IProps {};
 
 type Form = {
     email: string;
     password: string;
-}
+};
 
 function Login(props: IProps) {
     const {t} = useTranslation(["auth", "form"]);
@@ -32,18 +33,20 @@ function Login(props: IProps) {
     }
 
     return (
-        <div className="m-auto p-8 rounded-md shadow-lg bg-white">
+        <div className="m-auto p-8 rounded-md shadow-lg
+        dark:bg-slate-900 dark:shadow-white/10">
             <form className="grid grid-cols-1 gap-6" onSubmit={handleSubmit(onSubmit)}>
                 <div>
-                    <div className="flex flex-row rounded-md shadow-md overflow-hidden focus-within:shadow-lg">
-                        <label htmlFor="email" className="flex w-10">
-                            <EnvelopeIcon className="w-6 m-auto"/>
+                    <div className="flex flex-row rounded-md shadow-md overflow-hidden focus-within:shadow-lg
+                    dark:bg-slate-800 dark:shadow-white/10 dark:focus-within:shadow-white/10">
+                        <label htmlFor="email" className="w-10 p-2">
+                            <EnvelopeIcon className="h-full"/>
                         </label>
                         
                         <input
                         id="email"
                         type="email" 
-                        className="flex-auto border-0 focus:ring-0" 
+                        className="flex-auto border-0 bg-inherit focus:ring-0" 
                         placeholder={t("auth:login.form.email")}
                         {...register("email", {
                             required: {value: true, message: t("form:required", {field: t("auth:login.form.email")})},
@@ -58,15 +61,16 @@ function Login(props: IProps) {
                 </div>
 
                 <div>
-                    <div className="flex flex-row rounded-md shadow-md overflow-hidden focus-within:shadow-lg">
-                        <label htmlFor="password" className="flex w-10">
-                            <KeyIcon className="w-6 m-auto"/>
+                    <div className="flex flex-row rounded-md shadow-md overflow-hidden focus-within:shadow-lg
+                    dark:bg-slate-800 dark:shadow-white/10 dark:focus-within:shadow-white/10">
+                        <label htmlFor="password" className="w-10 p-2">
+                            <KeyIcon className="h-full"/>
                         </label>
                         
                         <input
                         id="password"
                         type="password" 
-                        className="flex-auto border-0 focus:ring-0"
+                        className="flex-auto border-0 bg-inherit focus:ring-0"
                         placeholder={t("auth:login.form.password")}
                         {...register("password", {
                             required: {value: true, message: t("form:required", {field: t("auth:login.form.password")})},
@@ -80,7 +84,14 @@ function Login(props: IProps) {
                     render={({message}) => <p className="text-red-600">{message}</p>}/>
                 </div>
 
-                <input type="submit" className="px-2 py-1 rounded-md shadow-lg shadow-blue-500/50 bg-blue-500 text-white cursor-pointer hover:shadow-md hover:shadow-blue-400/50 hover:bg-blue-400 active:shadow-lg active:shadow-blue-500/50 active:bg-blue-500" value={t("auth:login.submit-button")}/>
+                <input 
+                type="submit" 
+                className="px-2 py-1 rounded-md shadow-md bg-blue-500 text-white cursor-pointer 
+                hover:shadow-lg hover:bg-blue-400 
+                active:shadow-md active:bg-blue-500 
+                dark:shadow-white/10 dark:bg-blue-900 
+                dark:hover:shadow-white/10 dark:hover:bg-blue-800
+                dark:active:shadow-white/10 dark:active:bg-blue-900" value={t("auth:login.submit-button")}/>
 
                 <div>
                     <label>{t("auth:login.register-instruction")}</label>
@@ -92,4 +103,4 @@ function Login(props: IProps) {
     );
 }
 
-export default Login;
+export default withMenubar(memo(Login));

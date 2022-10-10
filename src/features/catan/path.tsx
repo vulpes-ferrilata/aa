@@ -1,17 +1,20 @@
-import React, { useMemo } from 'react';
-import { Action, Path as PathModel, Player, PlayerColor } from 'features/catan/api';
+import React, { memo, useMemo } from 'react';
+import { Action, Game, Path as PathModel, Player } from 'features/catan/api';
 
-import Hex, {IProps as IHexProps} from './hex';
+import Hex from './hex';
+import classNames from 'classnames';
 
-interface iProps {
+interface IProps {
+    game: Game;
+    me?: Player;
     path: PathModel;
     player?: Player;
     action?: Action;
     onClick?: () => void;
-}
+};
 
-function Path(props: iProps & IHexProps) {
-    const className = useMemo(() => {
+function Path(props: IProps) {
+    const pathRotation = useMemo(() => {
         switch (props.path.location) {
             case "TOP_LEFT":
                 return "rotate-[60deg]"
@@ -20,10 +23,10 @@ function Path(props: iProps & IHexProps) {
             case "BOTTOM_LEFT":
                 return "rotate-[-60deg]"
         }
-    }, [props.path.location])
+    }, [props.path]);
 
-    const getPlayerColor = (color: PlayerColor) => {
-        switch(color) {
+    const playerBackgroundColor = useMemo(() => {
+        switch(props.player?.color) {
             case "RED":
                 return "bg-red-600";
             case "BLUE":
@@ -33,32 +36,44 @@ function Path(props: iProps & IHexProps) {
             case "YELLOW":
                 return "bg-yellow-600";
         }
-    }
+    }, [props.player]);
+
+    const myBackgroundColor = useMemo(() => {
+        switch(props.me?.color) {
+            case "RED":
+                return "bg-red-600";
+            case "BLUE":
+                return "bg-blue-600";
+            case "GREEN":
+                return "bg-green-600";
+            case "YELLOW":
+                return "bg-yellow-600";
+        }
+    }, [props.me]);
 
     return (
         <Hex game={props.game} q={props.path.q} r={props.path.r}>
-            <div className={`w-full h-full ${className}`}>
+            <div className={classNames("w-full h-full", pathRotation)}>
                 <div className="absolute top-1/4 left-0 h-1/2 w-1/5 -translate-x-1/2 pointer-events-auto" onClick={props.onClick}>
                     <div className="flex w-1/2 h-full mx-auto">
-                        {/* <div className={`w-full h-1/2 m-auto ${playerColor} ${props.player? "": "animate-pulse"} ${props.player || (props.action instanceof BuildSettlementAndRoad && props.action.pathID === props.path.id) || (props.action instanceof BuildRoad && props.action.pathID === props.path.id)? "block": "hidden"} ${!props.player && props.game.me?.isActive && (!props.action || (props.action instanceof BuildSettlementAndRoad && !props.action.pathID))? "group-hover:block": ""}`}/> */}
-                        <div className="w-full h-1/2 m-auto">
+                        <div className="w-full h-3/4 m-auto">
                             {
                                 props.player?
-                                    <div className={`w-full h-full ${getPlayerColor(props.player.color)}`}/>
+                                    <div className={classNames("w-full h-full", playerBackgroundColor)}/>
                                 :
                                     null
                             }
 
                             {
-                                props.game.me?.isActive && props.action && "pathID" in props.action && props.action.pathID === props.path.id?
-                                    <div className={`w-full h-full ${getPlayerColor(props.game.me.color)} animate-pulse`}/>
+                                props.me && props.action && "pathID" in props.action && props.action.pathID === props.path.id?
+                                    <div className={classNames("w-full h-full animate-pulse", myBackgroundColor)}/>
                                 :
                                     null
                             }
 
                             {
-                                props.game.me?.isActive && props.action && "pathIDs" in props.action && props.action.pathIDs?.includes(props.path.id)?
-                                    <div className={`w-full h-full ${getPlayerColor(props.game.me.color)} animate-pulse`}/>
+                                props.me && props.action && "pathIDs" in props.action && props.action.pathIDs?.includes(props.path.id)?
+                                    <div className={classNames("w-full h-full animate-pulse", myBackgroundColor)}/>
                                 :
                                     null
                             }
@@ -70,4 +85,10 @@ function Path(props: iProps & IHexProps) {
     );
 }
 
-export default Path;
+export default memo(Path, (prevProps, nextProps) => {
+    return prevProps.game === nextProps.game && 
+    prevProps.me === nextProps.me && 
+    prevProps.path === nextProps.path && 
+    prevProps.player === nextProps.player &&
+    prevProps.action === nextProps.action;
+});

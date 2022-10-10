@@ -1,23 +1,28 @@
-const plugin = require('tailwindcss/plugin')
+const plugin = require("tailwindcss/plugin")
 
 module.exports = {
     content: [
         "./src/**/*.{ts,tsx}",
     ],
+    darkMode: "class",
     theme: {
         extend: {
             flex: {
-                content: '0 1 content',
+                content: "0 1 content",
             },
             aspectRatio: {
-                hex: '1/1.1547005',
-                '2/3': '2/3',
-                '5/6': '5/6',
+                hex: "1/1.1547005",
+                "2/3": "2/3",
+                "5/6": "5/6",
             },
             minWidth: {
-                '4': '1rem',
-                '1/5': '20%',
-                '1/2': '50%',
+                "4": "1rem",
+                "16": "4rem",
+                "1/5": "20%",
+                "1/2": "50%",
+            },
+            maxWidth: {
+                "screen": "100vw"
             },
             width: {
                 "6/8": "75%",
@@ -27,14 +32,12 @@ module.exports = {
                 "6/8": "75%",
                 "1/8": "12.5%", 
             },
-            padding: {
-                "1/10": "10%",
+            rotate: {
+                "120": "120deg",
+                "60": "60deg"
             },
             boxShadow: {
                 "inner-lg": "inset 0 2px 4px 0 rgb(0 0 0 / 0.1)",
-            },
-            translate: {
-                "1/10": "10%",
             },
             keyframes: {
                 "roll": {
@@ -48,16 +51,21 @@ module.exports = {
             },
             animation: {
                 "roll": "roll 1s linear infinite",
+            },
+            screens: {
+                "sm-h-&-aspect-4/3": {
+                    "raw": "(min-height: 480px) and (min-aspect-ratio: 4/3)"
+                }
             }
         },
     },
     plugins: [
-        require('@tailwindcss/forms'),
+        require("@tailwindcss/forms"),
         plugin(function({ addBase, theme }) {
             addBase({
-                'h1': { fontSize: theme('fontSize.2xl') },
-                'h2': { fontSize: theme('fontSize.xl') },
-                'h3': { fontSize: theme('fontSize.lg') },
+                "h1": { fontSize: theme("fontSize.2xl") },
+                "h2": { fontSize: theme("fontSize.xl") },
+                "h3": { fontSize: theme("fontSize.lg") },
             })
         })
     ],

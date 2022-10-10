@@ -1,15 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 
-import Hex, { IProps as IHexProps } from './hex';
+import Hex from './hex';
 
-import { Harbor as HarborModel, Terrain as TerrainModel } from 'features/catan/api';
+import { Game, Harbor as HarborModel, Terrain as TerrainModel } from 'features/catan/api';
 
-interface iProps {
+interface IProps {
+    game: Game;
     harbor: HarborModel;
     terrain: TerrainModel;
-}
+};
 
-function Harbor(props: iProps & IHexProps) {
+function Harbor(props: IProps) {
     const [src, setSrc] = useState<string>();
 
     useEffect(() => {
@@ -50,7 +51,7 @@ function Harbor(props: iProps & IHexProps) {
             case "GENERAL":
                 return "general harbor";
         }
-    }, [props.harbor.type])
+    }, [props.harbor.type]);
 
     const rotation = useMemo(() => {
         const directionQ = props.terrain.q - props.harbor.q;
@@ -71,7 +72,7 @@ function Harbor(props: iProps & IHexProps) {
                 return "-rotate-[30deg]";
         }
 
-    }, [props.harbor, props.terrain])
+    }, [props.harbor, props.terrain]);
 
     return (
         <Hex game={props.game} q={props.harbor.q} r={props.harbor.r}>
@@ -87,4 +88,8 @@ function Harbor(props: iProps & IHexProps) {
     );
 }
 
-export default Harbor;
+export default memo(Harbor, (prevProps, nextProps) => {
+    return prevProps.game === nextProps.game && 
+    prevProps.harbor === nextProps.harbor && 
+    prevProps.terrain === nextProps.terrain;
+});

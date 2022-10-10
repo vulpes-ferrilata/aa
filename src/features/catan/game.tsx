@@ -1,31 +1,35 @@
-import React, { lazy } from 'react';
+import React, { lazy, useMemo } from 'react';
 import {useParams} from 'react-router-dom';
 
 import { useGetGameQuery } from 'features/catan/api';
 import Loading from 'shared/components/loading';
+import { useGetMeQuery } from 'features/user/api';
 
 const GameWaiting = lazy(() => import('features/catan/gameWaiting'));
 const GameStarted = lazy(() => import('features/catan/gameStarted'));
 const GameFinished = lazy(() => import('features/catan/gameFinished'));
 
-interface iProps {}
+interface IProps {};
 
-function Game(props: iProps) {
+function Game(props: IProps) {
     const {id} = useParams();
 
-    const {data} = useGetGameQuery(id || "");
+    const {data: game} = useGetGameQuery(id || "");
+    const {data: loggedInUser} = useGetMeQuery();
 
-    if (!data) {
+    const me = useMemo(() => game? [game.activePlayer, ...game.players].find(player => player.userID === loggedInUser?.id): undefined, [game, loggedInUser]);
+
+    if (!game) {
         return <Loading/>
     } 
     
-    switch (data.status) {
+    switch (game.status) {
         case "WAITING":
-            return <GameWaiting game={data}/>
+            return <GameWaiting game={game} me={me}/>
         case "STARTED":
-            return <GameStarted game={data}/>;
+            return <GameStarted game={game} me={me}/>;
         case "FINISHED":
-            return <GameFinished game={data}/>;
+            return <GameFinished game={game} me={me}/>;
     }
 }
 

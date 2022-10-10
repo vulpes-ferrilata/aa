@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AchievementType } from 'features/catan/api';
 
-interface iProps {
+interface IProps {
     type: AchievementType;
-}
+};
 
-function ResourceCard(props: iProps) {
+function ResourceCard(props: IProps) {
     const [src, setSrc] = useState<string>();
     
     useEffect(() => {

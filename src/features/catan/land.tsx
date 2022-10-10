@@ -1,20 +1,22 @@
-import React, {  useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 
-import Hex, {IProps as IHexProps} from './hex';
+import Hex from './hex';
 
 import {ReactComponent as SettlementIcon} from 'assets/svg/settlement.svg';
 import {ReactComponent as CityIcon} from 'assets/svg/city.svg';
-import { Action, Construction as ConstructionModel, Land as LandModel, Player, PlayerColor } from 'features/catan/api';
+import { Action, Construction as ConstructionModel, Game, Land as LandModel, Player, PlayerColor } from 'features/catan/api';
 
-interface iProps {
+interface IProps {
+    game: Game;
+    me?: Player;
     land: LandModel;
     construction?: ConstructionModel;
     player?: Player;
     action?: Action;
     onClick?: () => void;
-}
+};
 
-function Land(props: iProps & IHexProps) {
+function Land(props: IProps) {
     const className = useMemo(() => {
         switch(props.land.location) {
             case "TOP":
@@ -22,7 +24,7 @@ function Land(props: iProps & IHexProps) {
             case "BOTTOM":
                 return "bottom-0 translate-y-1/2"
         }
-    }, [props.land.location])
+    }, [props.land.location]);
 
     const constructionIcon = useMemo(() => {
         switch (props.construction?.type) {
@@ -31,7 +33,7 @@ function Land(props: iProps & IHexProps) {
             case "CITY":
                 return <CityIcon/>;
         }
-    }, [props.construction])
+    }, [props.construction]);
 
     const getPlayerColor = (color: PlayerColor) => {
         switch(color) {
@@ -44,7 +46,7 @@ function Land(props: iProps & IHexProps) {
             case "YELLOW":
                 return "text-yellow-600";
         }
-    }
+    };
 
     return (
         <Hex game={props.game} q={props.land.q} r={props.land.r}>
@@ -59,8 +61,8 @@ function Land(props: iProps & IHexProps) {
                 }
 
                 {
-                    props.game.me?.isActive && props.action && "constructionID" in props.action && props.action.constructionID === props.construction?.id?
-                        <div className={`${getPlayerColor(props.game.me.color)} animate-pulse`}>
+                    props.me && props.action && "constructionID" in props.action && props.action.constructionID === props.construction?.id?
+                        <div className={`${getPlayerColor(props.me.color)} animate-pulse`}>
                             <CityIcon/>
                         </div>
                     :
@@ -68,8 +70,8 @@ function Land(props: iProps & IHexProps) {
                 }
 
                 {
-                    props.game.me?.isActive && props.action && "landID" in props.action && props.action.landID === props.land.id?
-                        <div className={`${getPlayerColor(props.game.me.color)} animate-pulse`}>
+                    props.me && props.action && "landID" in props.action && props.action.landID === props.land.id?
+                        <div className={`${getPlayerColor(props.me.color)} animate-pulse`}>
                             <SettlementIcon/>
                         </div>
                     :
@@ -81,4 +83,11 @@ function Land(props: iProps & IHexProps) {
     );
 }
 
-export default Land;
+export default memo(Land, (prevProps, nextProps) => {
+    return prevProps.game === nextProps.game && 
+    prevProps.me === nextProps.me && 
+    prevProps.land === nextProps.land && 
+    prevProps.construction === nextProps.construction &&
+    prevProps.player === nextProps.player &&
+    prevProps.action === nextProps.action;
+});

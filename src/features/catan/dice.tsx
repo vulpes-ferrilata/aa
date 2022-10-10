@@ -1,12 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
+import classNames from 'classnames';
 
-import { Dice as DiceModel } from 'features/catan/api'
+import { Dice as DiceModel, Game } from 'features/catan/api';
 
-interface iProps {
+interface IProps {
+    game: Game;
     dice: DiceModel;
-}
+};
 
-function Dice(props: iProps) {
+function Dice(props: IProps) {
     const transform = useMemo(() => {
         switch (props.dice.number) {
             case 1:
@@ -22,27 +24,40 @@ function Dice(props: iProps) {
             case 6:
                 return "rotateX(0deg) rotateY(180deg)";
         }
-    }, [props.dice.number])
+    }, [props.dice.number]);
+
+    const backgroundColor = useMemo(() => {
+        switch (props.game.activePlayer.color) {
+            case "RED":
+                return "bg-red-600";
+            case "BLUE":
+                return "bg-blue-600";
+            case "GREEN":
+                return "bg-green-600";
+            case "YELLOW":
+                return "bg-yellow-600";
+        }
+    }, [props.game])
 
     return (
         <div className="h-full aspect-square" style={{perspective: "99px"}}>
-            <div className="relative w-full h-full transition-all duration-1000" style={{transformStyle: "preserve-3d", transform: transform}}>
-                <div className="absolute flex w-full h-full bg-red-600/90 text-white" style={{transform: "rotateY(90deg) translateX(-50%) rotateY(-90deg)"}}>
+            <div className="relative w-full h-full text-white transition-all duration-1000" style={{transformStyle: "preserve-3d", transform: transform}}>
+                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "rotateY(90deg) translateX(-50%) rotateY(-90deg)"}}>
                     <label className="m-auto">1</label>
                 </div>
-                <div className="absolute flex w-full h-full bg-red-600/90 text-white" style={{transform: "rotateY(90deg) translateX(50%) rotateY(90deg)"}}>
+                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "rotateY(90deg) translateX(50%) rotateY(90deg)"}}>
                     <label className="m-auto">6</label>
                 </div>
-                <div className="absolute flex w-full h-full bg-red-600/90 text-white" style={{transform: "translateX(50%) rotateY(90deg)"}}>
+                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "translateX(50%) rotateY(90deg)"}}>
                     <label className="m-auto">4 </label>
                 </div>
-                <div className="absolute flex w-full h-full bg-red-600/90 text-white" style={{transform: "translateX(-50%) rotateY(-90deg)"}}>
+                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "translateX(-50%) rotateY(-90deg)"}}>
                     <label className="m-auto">3</label>
                 </div>
-                <div className="absolute flex w-full h-full bg-red-600/90 text-white" style={{transform: "translateY(-50%) rotateX(90deg)"}}>
+                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "translateY(-50%) rotateX(90deg)"}}>
                     <label className="m-auto">2</label>
                 </div>
-                <div className="absolute flex w-full h-full bg-red-600/90 text-white" style={{transform: "translateY(50%) rotateX(-90deg)"}}>
+                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "translateY(50%) rotateX(-90deg)"}}>
                     <label className="m-auto">5</label>
                 </div>
             </div>
@@ -50,4 +65,4 @@ function Dice(props: iProps) {
     );
 }
 
-export default Dice;
+export default memo(Dice);

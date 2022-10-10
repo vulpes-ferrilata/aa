@@ -1,15 +1,21 @@
-import { createSlice } from '@reduxjs/toolkit'
-import api from 'features/auth/api'
+import { createSlice } from '@reduxjs/toolkit';
+
+import api from 'features/auth/api';
+
+const enum LocalStorage {
+  AccessToken = "ACCESS_TOKEN",
+  RefreshToken = "REFRESH_TOKEN",
+};
 
 export type Auth = {
   accessToken: string | null;
   refreshToken: string | null;
-}
+};
 
 const initialState: Auth = {
-  accessToken: localStorage.getItem("ACCESS_TOKEN"),
-  refreshToken: localStorage.getItem("REFRESH_TOKEN")
-}
+  accessToken: localStorage.getItem(LocalStorage.AccessToken),
+  refreshToken: localStorage.getItem(LocalStorage.RefreshToken)
+};
 
 const slice = createSlice({
   name: 'auth',
@@ -20,8 +26,8 @@ const slice = createSlice({
       .addMatcher(
         api.endpoints.login.matchFulfilled,
         (state, {payload}) => {
-          localStorage.setItem("ACCESS_TOKEN", payload.accessToken);
-          localStorage.setItem("REFRESH_TOKEN", payload.refreshToken);
+          localStorage.setItem(LocalStorage.AccessToken, payload.accessToken);
+          localStorage.setItem(LocalStorage.RefreshToken, payload.refreshToken);
 
           state.accessToken = payload.accessToken;
           state.refreshToken = payload.refreshToken;
@@ -30,7 +36,7 @@ const slice = createSlice({
       .addMatcher(
         api.endpoints.refresh.matchFulfilled,
         (state, {payload}) => {
-          localStorage.setItem("ACCESS_TOKEN", payload.accessToken);
+          localStorage.setItem(LocalStorage.AccessToken, payload.accessToken);
 
           state.accessToken = payload.accessToken;
         }
@@ -38,14 +44,14 @@ const slice = createSlice({
       .addMatcher(
         api.endpoints.revoke.matchPending,
         (state, {payload}) => {
-          localStorage.removeItem("ACCESS_TOKEN");
-          localStorage.removeItem("REFRESH_TOKEN");
+          localStorage.removeItem(LocalStorage.AccessToken);
+          localStorage.removeItem(LocalStorage.RefreshToken);
 
           state.accessToken = null;
           state.refreshToken = null;
         }
       )
   },
-})
+});
 
-export default slice.reducer
+export default slice.reducer;

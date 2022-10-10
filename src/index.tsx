@@ -1,15 +1,14 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import reportWebVitals from './reportWebVitals'
-import { Provider } from 'react-redux'
-import { BrowserRouter } from 'react-router-dom'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import reportWebVitals from './reportWebVitals';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
 
-import store from 'app/store'
+import 'index.css';
 
-import 'index.css'
-import 'i18n'
-
-import App from 'app'
+import store from 'app/store';
+import 'i18n';
+import App from 'app';
 
 ReactDOM.render(
   <React.StrictMode>
