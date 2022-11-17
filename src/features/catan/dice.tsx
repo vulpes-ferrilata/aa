@@ -1,14 +1,14 @@
-import React, { memo, useMemo } from 'react';
+import React, { FunctionComponent, memo, useMemo } from 'react';
 import classNames from 'classnames';
 
-import { Dice as DiceModel, Game } from 'features/catan/api';
+import { Dice as DiceModel, GameDetail, PlayerColor } from 'features/catan/types';
 
 interface IProps {
-    game: Game;
+    game: GameDetail;
     dice: DiceModel;
 };
 
-function Dice(props: IProps) {
+const Dice: FunctionComponent<IProps> = (props: IProps) => {
     const transform = useMemo(() => {
         switch (props.dice.number) {
             case 1:
@@ -26,39 +26,31 @@ function Dice(props: IProps) {
         }
     }, [props.dice.number]);
 
-    const backgroundColor = useMemo(() => {
-        switch (props.game.activePlayer.color) {
-            case "RED":
-                return "bg-red-600";
-            case "BLUE":
-                return "bg-blue-600";
-            case "GREEN":
-                return "bg-green-600";
-            case "YELLOW":
-                return "bg-yellow-600";
-        }
-    }, [props.game])
-
     return (
         <div className="h-full aspect-square" style={{perspective: "99px"}}>
             <div className="relative w-full h-full text-white transition-all duration-1000" style={{transformStyle: "preserve-3d", transform: transform}}>
-                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "rotateY(90deg) translateX(-50%) rotateY(-90deg)"}}>
-                    <label className="m-auto">1</label>
+                <div className={classNames("absolute flex w-full h-full rounded-md", PlayerColor.toBackgroundColor(props.game.activePlayer.color))} style={{transform: "rotateY(90deg) translateX(-50%) rotateY(-90deg)"}}>
+                    <span className="m-auto">1</span>
                 </div>
-                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "rotateY(90deg) translateX(50%) rotateY(90deg)"}}>
-                    <label className="m-auto">6</label>
+
+                <div className={classNames("absolute flex w-full h-full rounded-md", PlayerColor.toBackgroundColor(props.game.activePlayer.color))} style={{transform: "translateY(-50%) rotateX(90deg)"}}>
+                    <span className="m-auto">2</span>
                 </div>
-                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "translateX(50%) rotateY(90deg)"}}>
-                    <label className="m-auto">4 </label>
+                
+                <div className={classNames("absolute flex w-full h-full rounded-md", PlayerColor.toBackgroundColor(props.game.activePlayer.color))} style={{transform: "translateX(-50%) rotateY(-90deg)"}}>
+                    <span className="m-auto">3</span>
                 </div>
-                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "translateX(-50%) rotateY(-90deg)"}}>
-                    <label className="m-auto">3</label>
+
+                <div className={classNames("absolute flex w-full h-full rounded-md", PlayerColor.toBackgroundColor(props.game.activePlayer.color))} style={{transform: "translateX(50%) rotateY(90deg)"}}>
+                    <span className="m-auto">4 </span>
                 </div>
-                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "translateY(-50%) rotateX(90deg)"}}>
-                    <label className="m-auto">2</label>
+
+                <div className={classNames("absolute flex w-full h-full rounded-md", PlayerColor.toBackgroundColor(props.game.activePlayer.color))} style={{transform: "translateY(50%) rotateX(-90deg)"}}>
+                    <span className="m-auto">5</span>
                 </div>
-                <div className={classNames("absolute flex w-full h-full rounded-md", backgroundColor)} style={{transform: "translateY(50%) rotateX(-90deg)"}}>
-                    <label className="m-auto">5</label>
+                
+                <div className={classNames("absolute flex w-full h-full rounded-md", PlayerColor.toBackgroundColor(props.game.activePlayer.color))} style={{transform: "rotateY(90deg) translateX(50%) rotateY(90deg)"}}>
+                    <span className="m-auto">6</span>
                 </div>
             </div>
         </div>

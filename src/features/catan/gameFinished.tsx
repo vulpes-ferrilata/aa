@@ -1,25 +1,26 @@
-import React, { memo } from 'react';
+import React, { FunctionComponent, memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { Game, Player } from 'features/catan/api';
 import { AcademicCapIcon } from '@heroicons/react/24/outline';
+
+import { GameDetail, Player } from 'features/catan/types';
 import DisplayName from 'features/user/displayName';
 import MessageList from 'features/chat/messageList';
-import withMenubar from 'shared/hoc/withMenubar';
+import classNames from 'classnames';
 
 interface IProps {
-    game: Game;
+    game: GameDetail;
     me?: Player;
 };
 
-function GameFinished(props: IProps) {
+const GameFinished: FunctionComponent<IProps> = (props: IProps) => {
     const {t} = useTranslation("catan");
     const navigate = useNavigate();
 
-    const handleLeaveGame = () => {
-        navigate("/")
-    }
+    const handleLeaveGame = useCallback(() => {
+        navigate("/catan/games")
+    }, [navigate]);
 
     return (
         <div className="relative flex flex-col w-full mx-auto p-4 gap-2 md:w-1/2 
@@ -52,9 +53,15 @@ function GameFinished(props: IProps) {
                     <tbody>
                         {[props.game.activePlayer, ...props.game.players].map(player => (
                             <tr key={player.id} className="shadow dark:shadow-white/10">
-                                <td className="px-2 text-center">{player.score >= 10? <AcademicCapIcon className="w-6 m-auto"/>: null}</td>
-                                <td className={`px-2 text-center ${player === props.me? "text-blue-600": ""}`}><DisplayName id={player.id}/></td>
-                                <td className="px-2 text-center"><label>{player.score}</label></td>
+                                <td className="px-2 text-center">{player.score >= 10 && <AcademicCapIcon className="w-6 m-auto"/>}</td>
+                                
+                                <td className={classNames("px-2 text-center", {
+                                    "text-blue-600": player === props.me
+                                })}>
+                                    <DisplayName id={player.userID}/>
+                                </td>
+
+                                <td className="px-2 text-center">{player.score}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -71,7 +78,4 @@ function GameFinished(props: IProps) {
     );
 }
 
-export default withMenubar<IProps>(memo(GameFinished, (prevProps, nextProps) => {
-    return prevProps.game === nextProps.game &&
-    prevProps.me === nextProps.me;
-}));
+export default memo(GameFinished);

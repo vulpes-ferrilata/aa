@@ -1,26 +1,27 @@
-import React, { memo, useMemo } from 'react'
-import { Game, Player } from 'features/catan/api';
-import ResourceCard from './resourceCard';
-
-import { ArrowDownIcon } from '@heroicons/react/24/outline';
+import React, { FunctionComponent, memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next';
 
+import { ArrowDownIcon } from '@heroicons/react/24/outline';
+
+import { GameDetail, Player } from 'features/catan/types';
+import ResourceCard from 'features/catan/resourceCard';
+
 interface IProps {
-    game: Game;
+    game: GameDetail;
     me?: Player;
     cancelTradeOffer: () => void;
     confirmTradeOffer: () => void;
 };
 
-function ConfirmTradeOffer(props: IProps) {
+const ConfirmTradeOfferDialog: FunctionComponent<IProps> = (props: IProps) => {
     const {t} = useTranslation("catan");
 
     const mySelectedResourceCards = useMemo(() => {
-        return props.me?.resourceCards.filter(resourceCard => resourceCard.isSelected);
+        return props.me?.resourceCards.filter(resourceCard => resourceCard.offering);
     }, [props.me])
 
     const activePlayerResourceCards = useMemo(() => {
-        return props.game.activePlayer.resourceCards.filter(resourceCard => resourceCard.isSelected);
+        return props.game.activePlayer.resourceCards.filter(resourceCard => resourceCard.offering);
     }, [props.game])
 
     return (
@@ -68,7 +69,4 @@ function ConfirmTradeOffer(props: IProps) {
     )
 }
 
-export default memo(ConfirmTradeOffer, (prevProps, nextProps) => {
-    return prevProps.game === nextProps.game &&
-    prevProps.me === nextProps.me;
-});
+export default memo(ConfirmTradeOfferDialog);

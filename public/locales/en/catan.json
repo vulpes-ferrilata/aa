@@ -19,6 +19,7 @@
             }
         },
         "started": {
+            "instruction-button": "Instruction",
             "cancel-button": "Cancel",
             "confirm-button": "Confirm",
             "end-turn-button": "End Turn",
@@ -30,6 +31,47 @@
             "resource-card-selection-dialog": {
                 "cancel-button": "Cancel",
                 "confirm-button": "Confirm"
+            },
+            "instruction-dialog": {
+                "building-cost": {
+                    "title": "Building Cost"
+                },
+                "achievement-cards": {
+                    "title": "Achievement Cards",
+                    "data-table": {
+                        "headers": {
+                            "card": "Card",
+                            "description": "Description"
+                        },
+                        "contents": {
+                            "longest-road-achievement-description": "This card goes to the player with the longest road of at least 5 segments. Another player who builds a longer road takes this card.",
+                            "largest-army-achievement-description": "The first player to play 3 Knight cards gets this card. Another player who plays more Knight cards takes this card."
+                        }
+                    }
+                },
+                "development-cards": {
+                    "title": "Development Cards",
+                    "data-table": {
+                        "headers": {
+                            "card": "Card",
+                            "description": "Description"
+                        },
+                        "contents": {
+                            "knight-card-description": "If you play a knight card, you must immediately move the robber.",
+                            "road-building-card-description": "If you play this card, you may immediately place 2 free roads on the board.",
+                            "year-of-plenty-card-description": "If you play this card you may immediately take any 2 resource cards from the supply stacks. You may use these cards to build in the same turn.",
+                            "monopoly-card-description": "If you play this card, you must name 1 type of resource. All the other players must give you all of the resource cards of this type that they have in their hands. If an opponent does not have a resource card of the specified type, they do not have to give you anything.",
+                            "victory-points-card-description": "Equivalent to 1 victory point."
+                        }
+                    }
+                },
+                "victory-points": {
+                    "title": "Victory Points",
+                    "data-table": {
+                        "source": "Source",
+                        "points": "Points"
+                    }
+                }
             }
         },
         "finished": {

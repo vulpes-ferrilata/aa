@@ -19,6 +19,7 @@ WORKDIR /usr/share/nginx/html
 
 RUN rm -rf ./*
 
+
 COPY --from=builder /app/build .
 
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template

@@ -1,17 +1,6 @@
 import { createAsyncThunk, createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit';
 
-export type Notification = {
-	id: string;
-	type: NotificationType;
-	detail: string;  
-};
-
-export enum NotificationType {
-	Info = "INFO",
-	Success = "SUCCESS",
-	Warning = "WARNING",
-	Error = "ERROR",
-};
+import { Notification } from 'features/notification/types';
 
 export const addNotification = createAsyncThunk("notifications/add", async (toast: Omit<Notification, "id">, thunkAPI) => {
 	let id = nanoid();

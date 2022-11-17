@@ -19,6 +19,7 @@
             }
         },
         "started": {
+            "instruction-button": "Hướng dẫn",
             "cancel-button": "Hủy",
             "confirm-button": "Xác nhận",
             "end-turn-button": "Kết thúc lượt",
@@ -30,6 +31,47 @@
             "resource-card-selection-dialog": {
                 "cancel-button": "Cancel",
                 "confirm-button": "Confirm"
+            },
+            "instruction-dialog": {
+                "building-cost": {
+                    "title": "Chi phí xây dựng"
+                },
+                "achievement-cards": {
+                    "title": "Thẻ thành tựu",
+                    "data-table": {
+                        "headers": {
+                            "card": "Thẻ",
+                            "description": "Mô tả"
+                        },
+                        "contents": {
+                            "longest-road-achievement-description": "Thẻ này sẽ được phát cho người chơi có ít nhất 5 con đường liên tiếp dài nhất. Người chơi khác xây đường dài hơn sẽ đoạt lấy thẻ này.",
+                            "largest-army-achievement-description": "Người chơi đầu tiên sử dụng 3 thẻ hiệp sĩ sẽ nhận được thẻ này. Người chơi khác sử dụng nhiều thẻ hiệp sĩ hơn sẽ đoạt lấy thẻ này."
+                        }
+                    }
+                },
+                "development-cards": {
+                    "title": "Thẻ phát triển",
+                    "data-table": {
+                        "headers": {
+                            "card": "Thẻ",
+                            "description": "Mô tả"
+                        },
+                        "contents": {
+                            "knight-card-description": "Nếu bạn sử dụng thẻ hiệp sĩ, bạn phải ngay lập tức di chuyển tên cướp.",
+                            "road-building-card-description": "Nếu bạn sử dụng thẻ này, bạn có thể ngay lập tức đặt 2 con đường miễn phí lên bản đồ.",
+                            "year-of-plenty-card-description": "Nếu bạn sử dụng thẻ này, bạn có thể ngay lập tức nhận tối đa 2 thẻ tài nguyên từ chồng bài trên bàn. Bạn có thể sử dụng thẻ tài nguyên nhận được để xây trong lượt.",
+                            "monopoly-card-description": "Nếu bạn sử dụng thẻ này, bạn phải chỉ định 1 tài nguyên. Tất cả người chơi khác phải đưa tất cả thẻ tài nguyên cùng loại với tài nguyên mà bạn đã chỉ định mà họ có. Nếu người chơi đó không có thẻ tài nguyên cùng loại với tài nguyên mà bạn chỉ định, họ không phải đưa gì cả.",
+                            "victory-points-card-description": "Bằng với 1 điểm chiến thắng."
+                        }
+                    }
+                },
+                "victory-points": {
+                    "title": "Điểm chiến thắng",
+                    "data-table": {
+                        "source": "Nguồn",
+                        "points": "Điểm"
+                    }
+                }
             }
         },
         "finished": {

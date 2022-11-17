@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { FunctionComponent, memo, useCallback } from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,6 @@ import { ErrorMessage } from '@hookform/error-message';
 import {KeyIcon, EnvelopeIcon} from '@heroicons/react/24/outline';
 
 import { useLoginMutation } from 'features/auth/api';
-import withMenubar from 'shared/hoc/withMenubar';
 
 interface IProps {};
 
@@ -17,20 +16,20 @@ type Form = {
     password: string;
 };
 
-function Login(props: IProps) {
+const Login: FunctionComponent<IProps> = (props: IProps) => {
     const {t} = useTranslation(["auth", "form"]);
     const navigate = useNavigate();
     const {register, handleSubmit, formState: {errors}} = useForm<Form>();
     const [login] = useLoginMutation();
 
-    const onSubmit: SubmitHandler<Form> = async data => {
+    const onSubmit: SubmitHandler<Form> = useCallback(async data => {
         await login({
             email: data.email,
             password: data.password,
         }).unwrap();
 
         navigate("/");
-    }
+    }, [login, navigate]);
 
     return (
         <div className="m-auto p-8 rounded-md shadow-lg
@@ -103,4 +102,4 @@ function Login(props: IProps) {
     );
 }
 
-export default withMenubar(memo(Login));
+export default memo(Login);

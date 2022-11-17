@@ -39,6 +39,9 @@ module.exports = {
             boxShadow: {
                 "inner-lg": "inset 0 2px 4px 0 rgb(0 0 0 / 0.1)",
             },
+            transitionDelay: {
+                "0": "0ms",
+            },
             keyframes: {
                 "roll": {
                     "0%, 100%": {transform: "rotateX(0deg) rotateY(0deg)"},
@@ -50,10 +53,10 @@ module.exports = {
                 }
             },
             animation: {
-                "roll": "roll 1s linear infinite",
+                "roll": "roll 2.1s linear infinite",
             },
             screens: {
-                "sm-h-&-aspect-4/3": {
+                "sm-h-and-aspect-4/3": {
                     "raw": "(min-height: 480px) and (min-aspect-ratio: 4/3)"
                 }
             }

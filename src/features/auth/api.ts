@@ -1,23 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-type RegisterRequest = {
-    displayName: string;
-    email: string;
-    password: string;
-};
-
-type LoginRequest = {
-    email: string;
-    password: string;
-};
-
-type Token = {
-    accessToken: string;
-    refreshToken: string;
-};
+import { LoginRequest, RegisterRequest, Token } from 'features/auth/types';
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: `${process.env.REACT_APP_GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/api/v1/auth`, 
+    baseUrl: `${process.env.REACT_APP_API_URL?? ""}/api/v1/auth`, 
     prepareHeaders: (headers, {getState}) => {
         const language = localStorage.getItem("i18nextLng");
         if (language) {

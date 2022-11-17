@@ -1,281 +1,12 @@
-import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
-import { RootState } from 'app/store'
-import { Mutex } from 'async-mutex'
+import { BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
+import { RootState } from 'app/store';
+import { Mutex } from 'async-mutex';
 
-import authApi from 'features/auth/api'
-
-type GameCreated = {
-    id: string;
-};
-
-export type Game = {
-    id: string;
-    status: GameStatus;
-    phase: GamePhase;
-    turn: number;
-    activePlayer: Player;
-    players: Player[];
-    dices: Dice[];
-    achievements: Achievement[];
-    resourceCards: ResourceCard[];
-    developmentCards: DevelopmentCard[];
-    terrains: Terrain[];
-    lands: Land[];
-    paths: Path[];
-};
-
-type GameStatus = "WAITING" | "STARTED" | "FINISHED";
-
-type GamePhase = "RESOURCE_PRODUCTION" | "ROBBING" | "RESOURCE_CONSUMPTION";
-
-export type Player = {
-    id: string;
-    userID: string;
-    color: PlayerColor;
-    turnOrder: number;
-    isOffered: boolean;
-    score: number;
-    achievements: Achievement[];
-    resourceCards: ResourceCard[];
-    developmentCards: DevelopmentCard[];
-    constructions: Construction[];
-    roads: Road[];
-};
-
-export type PlayerColor = "RED" | "BLUE" | "GREEN" | "YELLOW";
-
-export type Dice = {
-    id: string;
-    number: number;
-};
-
-type Achievement = {
-    id: string;
-    type: AchievementType;
-};
-
-export type AchievementType = "LONGEST_ROAD" | "LARGEST_ARMY";
-
-export type ResourceCard = {
-    id: string;
-    type: ResourceCardType;
-    isSelected: boolean;
-};
-
-export type ResourceCardType = "LUMBER" | "BRICK" | "WOOL" | "GRAIN" | "ORE" | "HIDDEN";
-
-export type DevelopmentCard = {
-    id: string;
-    type: DevelopmentCardType;
-    status: DevelopmentCardStatus;
-};
-
-export type DevelopmentCardType = "KNIGHT" | "MONOPOLY" | "ROAD_BUILDING" | "YEAR_OF_PLENTY" | "VICTORY_POINTS" | "HIDDEN";
-
-type DevelopmentCardStatus = "ENABLE" | "DISABLE" | "USED";
-
-export type Terrain = {
-    id: string;
-    q: number;
-    r: number;
-    number: number;
-    type: TerrainType;
-    harbor?: Harbor;
-    robber?: Robber;
-};
-
-export type TerrainType = "FOREST" | "HILL" | "FIELD" | "PASTURE" | "MOUNTAIN" | "DESERT";
-
-export type Harbor = {
-    id: string;
-    q: number;
-    r: number;
-    type: HarborType;
-};
-
-export type HarborType = "LUMBER" | "BRICK" | "WOOL" | "GRAIN" | "ORE" | "GENERAL";
-
-export type Robber = {
-    id: string;
-};
-
-export type Land = {
-    id: string;
-    q: number;
-    r: number;
-    location: LandLocation;
-};
-
-export type LandLocation = "TOP" | "BOTTOM";
-
-export type Path = {
-    id: string;
-    q: number;
-    r: number;
-    location: PathLocation;
-};
-
-export type Construction = {
-    id: string;
-    type: ConstructionType;
-    land?: Land;
-};
-
-export type ConstructionType = "SETTLEMENT" | "CITY";
-
-type Road = {
-    id: string;
-    path?: Path;
-};
-
-export type PathLocation = "TOP_LEFT" | "MIDDLE_LEFT" | "BOTTOM_LEFT";
-
-export class BuildSettlementAndRoad {
-    gameID?: string;
-    landID?: string;
-    pathID?: string;
-
-    constructor(gameID?: string, landID?: string, pathID?: string) {
-        this.gameID = gameID;
-        this.landID = landID;
-        this.pathID = pathID;
-    }
-}
-
-export class MoveRobber {
-    gameID?: string;
-    terrainID?: string;
-    playerID?: string;
-
-    constructor(gameID?: string, terrainID?: string, playerID?: string) {
-        this.gameID = gameID;
-        this.terrainID = terrainID;
-        this.playerID = playerID;
-    }
-}
-
-export class BuildSettlement {
-    gameID?: string;
-    landID?: string;
-
-    constructor(gameID?: string, landID?: string) {
-        this.gameID = gameID;
-        this.landID = landID;
-    }
-}
-
-export class BuildRoad {
-    gameID?: string;
-    pathID?: string;
-
-    constructor(gameID?: string, pathID?: string) {
-        this.gameID = gameID;
-        this.pathID = pathID;
-    }
-}
-
-export class UpgradeCity {
-    gameID?: string;
-    constructionID?: string;
-
-    constructor(gameID?: string, constructionID?: string) {
-        this.gameID = gameID;
-        this.constructionID = constructionID;
-    }
-}
-
-export class BuyDevelopmentCard {
-    gameID?: string;
-
-    constructor(gameID?: string) {
-        this.gameID = gameID;
-    }
-}
-
-export class ToggleResourceCards {
-    gameID?: string;
-    resourceCardIDs?: string[];
-
-    constructor(gameID?: string, resourceCardIDs?: string[]) {
-        this.gameID = gameID
-        this.resourceCardIDs = resourceCardIDs
-    }
-}
-
-export class MaritimeTrade {
-    gameID?: string;
-    resourceCardType?: ResourceCardType;
-
-    constructor(gameID?: string, resourceCardType?: ResourceCardType) {
-        this.gameID = gameID
-        this.resourceCardType = resourceCardType
-    }
-}
-
-export class OfferTrading {
-    gameID?: string;
-    playerID?: string;
-
-    constructor(gameID?: string, playerID?: string) {
-        this.gameID = gameID
-        this.playerID = playerID
-    }
-}
-
-export class PlayKnightCard {
-    gameID?: string;
-    developmentCardID?: string;
-    terrainID?: string;
-    playerID?: string;
-
-    constructor(gameID?: string, developmentCardID?: string, terrainID?: string, playerID?: string) {
-        this.gameID = gameID;
-        this.developmentCardID = developmentCardID;
-        this.terrainID = terrainID;
-        this.playerID = playerID;
-    }
-}
-
-export class PlayRoadBuildingCard {
-    gameID?: string;
-    developmentCardID?: string;
-    pathIDs?: string[];
-
-    constructor(gameID?: string, developmentCardID?: string, pathIDs?: string[]) {
-        this.gameID = gameID;
-        this.developmentCardID = developmentCardID;
-        this.pathIDs = pathIDs;
-    }
-}
-
-export class PlayYearOfPlentyCard {
-    gameID?: string;
-    developmentCardID?: string;
-    resourceCardTypes?: ResourceCardType[];
-
-    constructor(gameID?: string, developmentCardID?: string, resourceCardTypes?: ResourceCardType[]) {
-        this.gameID = gameID;
-        this.developmentCardID = developmentCardID;
-        this.resourceCardTypes = resourceCardTypes;
-    }
-}
-
-export class PlayMonopolyCard {
-    gameID?: string;
-    developmentCardID?: string;
-    resourceCardType?: ResourceCardType;
-
-    constructor(gameID?: string, developmentCardID?: string, resourceCardType?: ResourceCardType) {
-        this.gameID = gameID;
-        this.developmentCardID = developmentCardID;
-        this.resourceCardType = resourceCardType;
-    }
-}
-
-export type Action = BuildSettlementAndRoad | MoveRobber | BuildSettlement | BuildRoad | UpgradeCity | BuyDevelopmentCard | ToggleResourceCards | MaritimeTrade | OfferTrading | PlayKnightCard | PlayRoadBuildingCard | PlayYearOfPlentyCard | PlayMonopolyCard
+import authApi from 'features/auth/api';
+import { BuildRoad, BuildSettlement, BuildSettlementAndRoad, BuyDevelopmentCard, DiscardResourceCards, FindGamesRequest, Game, GameCreated, GameDetail, MaritimeTrade, MoveRobber, Pagination, PlayKnightCard, PlayMonopolyCard, PlayRoadBuildingCard, PlayYearOfPlentyCard, SendTradeOffer, ToggleResourceCards, UpgradeCity } from './types';
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: `${process.env.REACT_APP_GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/api/v1/catan`, 
+    baseUrl: `${process.env.REACT_APP_API_URL?? ""}/api/v1/catan/games`, 
     prepareHeaders: (headers, {getState}) => {
         const language = localStorage.getItem("i18nextLng");
         if (language) {
@@ -323,46 +54,52 @@ const baseQueryWithReAuthentication: BaseQueryFn<string | FetchArgs, unknown, Fe
 
 const api = createApi({
     reducerPath: "catanAPI",
-    tagTypes: ["Games"],
+    tagTypes: ["Game", "GameDetail"],
     baseQuery: baseQueryWithReAuthentication,
     endpoints: builder => ({
-        findAllGames: builder.query<Game[], void>({
-            query: () => ({
+        findGames: builder.query<Pagination<Game>, FindGamesRequest>({
+            query: (findGamesRequest: FindGamesRequest) => ({
                 url: "",
                 method: "GET",
+                params: findGamesRequest,
             }),
-            providesTags: (games = []) => [
-                "Games",
-                ...games.map(game => ({type: "Games" as const, id: game.id})), 
-            ]
+            providesTags: (gamePagination) => gamePagination? 
+                [
+                    ...gamePagination.data.map(({id}) => ({type: "Game" as const, id: id})),
+                    {type:"Game", id: "PARTIAL_LIST"},
+                ]
+            : 
+                [
+                    {type:"Game", id: "PARTIAL_LIST"},
+                ]
         }),
-        getGame: builder.query<Game, string>({
+        getGame: builder.query<GameDetail, string>({
             query: (id: string) => ({
                 url: `/${id}`,
                 method: "GET",
             }),
-            providesTags: (game, error, args) => [{type: "Games", id: args}]
+            providesTags: (game, error, args) => [{type: "GameDetail", id: args}]
         }),
         createGame: builder.mutation<GameCreated, void>({
             query: () => ({
                 url: "",
                 method: "POST",
             }),
-            invalidatesTags: ["Games"]
+            invalidatesTags: ["GameDetail"]
         }),
         joinGame: builder.mutation<void, string>({
             query: (gameID: string) => ({
                 url: `/${gameID}/join`,
                 method: "POST",
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args}]
         }),
         startGame: builder.mutation<void, string>({
             query: (gameID: string) => ({
                 url: `/${gameID}/start`,
                 method: "POST",
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args}]
         }),
         buildSettlementAndRoad: builder.mutation<void, BuildSettlementAndRoad>({
             query: (buildSettlementAndRoad: BuildSettlementAndRoad) => ({
@@ -373,14 +110,24 @@ const api = createApi({
                     pathID: buildSettlementAndRoad.pathID,
                 }
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         rollDices: builder.mutation<void, string>({
             query: (gameID: string) => ({
                 url: `/${gameID}/roll-dices`,
                 method: "POST",
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args}]
+        }),
+        discardResourceCards: builder.mutation<void, DiscardResourceCards>({
+            query: (discardResourceCards: DiscardResourceCards) => ({
+                url: `/${discardResourceCards.gameID}/discard-resource-cards`,
+                method: "POST",
+                body: {
+                    resourceCardIDs: discardResourceCards.resourceCardIDs,
+                }
+            }),
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         moveRobber: builder.mutation<void, MoveRobber>({
             query: (moveRobber: MoveRobber) => ({
@@ -391,14 +138,14 @@ const api = createApi({
                     playerID: moveRobber.playerID,
                 }
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         endTurn: builder.mutation<void, string>({
             query: (gameID: string) => ({
                 url: `/${gameID}/end-turn`,
                 method: "POST",
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args}]
         }),
         buildSettlement: builder.mutation<void, BuildSettlement>({
             query: (buildSettlement: BuildSettlement) => ({
@@ -408,7 +155,7 @@ const api = createApi({
                     landID: buildSettlement.landID,
                 }
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         buildRoad: builder.mutation<void, BuildRoad>({
             query: (buildRoad: BuildRoad) => ({
@@ -418,7 +165,7 @@ const api = createApi({
                     pathID: buildRoad.pathID,
                 }
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         upgradeCity: builder.mutation<void, UpgradeCity>({
             query: (upgradeCity: UpgradeCity) => ({
@@ -428,14 +175,14 @@ const api = createApi({
                     constructionID: upgradeCity.constructionID,
                 }
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         buyDevelopmentCard: builder.mutation<void, BuyDevelopmentCard>({
             query: (buyDevelopmentCard: BuyDevelopmentCard) => ({
                 url: `/${buyDevelopmentCard.gameID}/buy-development-card`,
                 method: "POST",
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         toggleResourceCards: builder.mutation<void, ToggleResourceCards>({
             query: (toggleResourceCards: ToggleResourceCards) => ({
@@ -445,7 +192,7 @@ const api = createApi({
                     resourceCardIDs: toggleResourceCards.resourceCardIDs,
                 }
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         maritimeTrade: builder.mutation<void, MaritimeTrade>({
             query: (maritimeTrade: MaritimeTrade) => ({
@@ -455,31 +202,31 @@ const api = createApi({
                     resourceCardType: maritimeTrade.resourceCardType,
                 }
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
-        sendTradeOffer: builder.mutation<void, OfferTrading>({
-            query: (offerTrading: OfferTrading) => ({
-                url: `/${offerTrading.gameID}/send-trade-offer`,
+        sendTradeOffer: builder.mutation<void, SendTradeOffer>({
+            query: (sendTradeOffer: SendTradeOffer) => ({
+                url: `/${sendTradeOffer.gameID}/send-trade-offer`,
                 method: "POST",
                 body: {
-                    playerID: offerTrading.playerID,
+                    playerID: sendTradeOffer.playerID,
                 }
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         confirmTradeOffer: builder.mutation<void, string>({
             query: (gameID: string) => ({
                 url: `/${gameID}/confirm-trade-offer`,
                 method: "POST",
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args}]
         }),
         cancelTradeOffer: builder.mutation<void, string>({
             query: (gameID: string) => ({
                 url: `/${gameID}/cancel-trade-offer`,
                 method: "POST",
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args}]
         }),
         playKnightCard: builder.mutation<void, PlayKnightCard>({
             query: (playKnightCard: PlayKnightCard) => ({
@@ -490,7 +237,7 @@ const api = createApi({
                     playerID: playKnightCard.playerID,
                 }
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         playRoadBuildingCard: builder.mutation<void, PlayRoadBuildingCard>({
             query: (playRoadBuildingCard: PlayRoadBuildingCard) => ({
@@ -500,7 +247,7 @@ const api = createApi({
                     pathIDs: playRoadBuildingCard.pathIDs,
                 }
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         playYearOfPlentyCard: builder.mutation<void, PlayYearOfPlentyCard>({
             query: (playYearOfPlentyCard: PlayYearOfPlentyCard) => ({
@@ -510,7 +257,7 @@ const api = createApi({
                     resourceCardTypes: playYearOfPlentyCard.resourceCardTypes,
                 }
             }),            
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         playMonopolyCard: builder.mutation<void, PlayMonopolyCard>({
             query: (playMonopolyCard: PlayMonopolyCard) => ({
@@ -520,7 +267,7 @@ const api = createApi({
                     resourceCardType: playMonopolyCard.resourceCardType,
                 }
             }),
-            invalidatesTags: (data, error, args) => [{type: "Games", id: args.gameID}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
     })
 });
@@ -528,13 +275,14 @@ const api = createApi({
 export default api;
 
 export const { 
-    useFindAllGamesQuery,
+    useFindGamesQuery,
     useGetGameQuery,
     useCreateGameMutation,
     useJoinGameMutation,
     useStartGameMutation,
     useBuildSettlementAndRoadMutation,
     useRollDicesMutation,
+    useDiscardResourceCardsMutation,
     useMoveRobberMutation,
     useEndTurnMutation,
     useBuildSettlementMutation,

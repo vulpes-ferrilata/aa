@@ -1,67 +1,62 @@
-import React, { useEffect, lazy, Suspense } from 'react';
-import {useRoutes, Navigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import classNames from 'classnames';
+import React, { useEffect, lazy, Suspense, FunctionComponent } from 'react';
+import { useRoutes } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
-import { RootState } from 'app/store';
+import { connectWebsocket } from 'features/websocket/actions';
 import Loading from 'shared/components/loading';
-import { connectWebsocket } from 'app/middlewares/websocketMiddleware';
-import withAuthentication from 'shared/hoc/withAuthentication';
-import { ColorScheme } from 'features/colorScheme/slice';
 
-const NotificationList = lazy(() => import('features/notification/notificationList'));
-const Login = lazy(() => import('features/auth/login'));
-const Register = lazy(() => import('features/auth/register'));
+const Toast = lazy(() => import('features/notification/toast'));
+const Layout = lazy(() => import('shared/components/layout'));
+const Menu = lazy(() => import('shared/components/menu'));
+const IndexPage = lazy(() => import('routes/index'));
+const LoginPage = lazy(() => import('routes/login'));
+const RegisterPage = lazy(() => import('routes/register'));
+const LobbyPage = lazy(() => import('routes/catan/games/index'));
+const GamePage = lazy(() => import('routes/catan/games/[id]/index'));
 
-const LobbyWithAuthentication = withAuthentication(lazy(() => import('features/catan/lobby')));
-const GameWithAuthentication = withAuthentication(lazy(() => import('features/catan/game')));
+interface IProps {}
 
-function App() {
-  const dispatch = useDispatch();
-  const colorScheme = useSelector<RootState, ColorScheme>(state => state.colorScheme);
+const App: FunctionComponent<IProps> = (props: IProps) => {
+    const dispatch = useDispatch();
 
-  const routes = useRoutes([
-    {
-      path: "/",
-      element: <Navigate to={"/lobby"} replace={true}/>,
-    },
-    {
-      path:"/login", 
-      element: <Login/>,
-    },
-    {
-      path: "/register", 
-      element: <Register/>,
-    },
-    {
-      path: "/lobby",
-      element: <LobbyWithAuthentication/>,
-    },
-    {
-      path: "/game/:id",
-      element: <GameWithAuthentication/>,
-    }
-  ]);
+    const routes = useRoutes([
+            {
+                path: "/",
+                element: <IndexPage/>,
+            },
+            {
+                path:"/login", 
+                element: <LoginPage/>,
+            },
+            {
+                path: "/register", 
+                element: <RegisterPage/>,
+            },
+            {
+                path: "/catan/games",
+                element: <LobbyPage/>,
+            },
+            {
+                path: "/catan/games/:id",
+                element: <GamePage/>,
+            }
+    ]);
 
-  useEffect(() => {
-    dispatch(connectWebsocket());
-  }, []);
-  
-  return (    
-    <div className={classNames("w-full h-full", {
-      "dark": colorScheme === ColorScheme.Dark
-    })}>
-      <div className="flex w-full h-full dark:bg-black dark:text-white dark:shadow-white/10">
+    useEffect(() => {
+        dispatch(connectWebsocket());
+    }, [dispatch]);
+    
+    return (
         <Suspense fallback={<Loading/>}>
-          <div className="fixed left-1/2 -translate-x-1/2 z-50">
-            <NotificationList/>
-          </div>
-        
-          {routes}
+            <Toast/>
+
+            <Layout>
+                <Menu>
+                    {routes}
+                </Menu>
+            </Layout>
         </Suspense>
-      </div>
-    </div>
-  );
+    );
 }
 
 export default App;

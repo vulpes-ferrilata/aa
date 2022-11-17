@@ -781,7 +781,11 @@ function dial(endpoint: string, connHandler: any, options?: Options): Promise<Co
 const websocketReconnectHeaderKey = 'X-Websocket-Reconnect';
 
 function _dial(endpoint: string, connHandler: any, tries: number, options?: Options): Promise<Conn> {
-    if (endpoint.indexOf("/") === 0) {
+    if (endpoint.startsWith("http")) {
+        endpoint = endpoint.replace("http", "ws");
+    }
+    
+    if (endpoint.startsWith("/")) {
         // if is running from browser and endpoint starts with /
         // lets try to fix it, useful when developers changing environments and servers.
         const scheme = document.location.protocol === "https:" ? "wss" : "ws";
@@ -789,7 +793,7 @@ function _dial(endpoint: string, connHandler: any, tries: number, options?: Opti
         endpoint = scheme + "://" + document.location.hostname + port + endpoint;
     }
 
-    if (endpoint.indexOf("ws") === -1) {
+    if (!endpoint.startsWith("ws")) {
         endpoint = "ws://" + endpoint;
     }
 

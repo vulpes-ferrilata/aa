@@ -1,7 +1,8 @@
 import { AnyAction, Dispatch, isRejectedWithValue, ThunkDispatch } from '@reduxjs/toolkit';
 import type { Middleware } from '@reduxjs/toolkit';
 
-import { addNotification, NotificationType } from 'features/notification/slice';
+import { addNotification } from 'features/notification/slice';
+import { NotificationType } from 'features/notification/types';
 
 const rtkQueryMiddleware: Middleware<{}, any, Dispatch<AnyAction> & ThunkDispatch<any, undefined, AnyAction>> = api => next => action => {
     if (isRejectedWithValue(action)) {

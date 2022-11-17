@@ -1,18 +1,19 @@
-import React from 'react';
+import React, { FunctionComponent, memo } from 'react';
+import Dice from './dice';
 
 interface IProps {};
 
-function Loading(IProps: IProps) {
+const Loading: FunctionComponent<IProps> = (props: IProps) => {
     return (
         <div className="fixed flex left-0 top-0 w-screen h-screen">
-            <div className="flex m-auto items-center justify-center space-x-2 animate-pulse">
-                <div className="w-8 h-8 bg-blue-500 rounded-full"></div>
-                <div className="w-8 h-8 bg-blue-500 rounded-full"></div>
-                <div className="w-8 h-8 bg-blue-500 rounded-full"></div>
+            <div className="flex m-auto h-8 gap-4">
+                {Array.from({length: 3}).map((_, i) => (
+                    <Dice key={i}/>
+                ))}
             </div>
         </div>
     );
 }
 
-export default Loading;
+export default memo(Loading);
 

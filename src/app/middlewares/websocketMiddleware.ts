@@ -1,19 +1,24 @@
-import { AnyAction, createAction, Dispatch, isAnyOf, ThunkDispatch } from '@reduxjs/toolkit'
+import { AnyAction, Dispatch, isAnyOf, ThunkDispatch } from '@reduxjs/toolkit'
 import type { Middleware } from '@reduxjs/toolkit'
-import {dial, NSConn, Message, Conn, Options, OnAnyEvent, isSystemEvent} from 'neffos';
+import {dial, NSConn, Message, Conn, Options, OnAnyEvent, isSystemEvent, OnNamespaceConnected, OnNamespaceDisconnect, OnNamespaceConnect} from 'neffos';
+import i18n from 'i18next';
 
 import userAPI from 'features/user/api';
 import catanAPI from 'features/catan/api';
-import chatAPI, { Message as ChatMessage } from 'features/chat/api';
-import { addNotification, NotificationType } from 'features/notification/slice';
-import i18n from 'i18next'
-
-export const connectWebsocket = createAction<undefined>("websocket/connect");
+import chatAPI from 'features/chat/api';
+import { Message as ChatMessage } from 'features/chat/types';
+import { addNotification } from 'features/notification/slice';
+import { NotificationType } from 'features/notification/types';
+import { connectWebsocket } from 'features/websocket/actions';
 
 const enum Namespace {
-    Catan = "catan",
-    Chat = "chat",
+    Catan = "Catan",
+    Chat = "Chat",
 };
+
+type CatanMessage = {
+    userID: string;
+}
 
 const websocketMiddleware: Middleware<{}, any, Dispatch<AnyAction> & ThunkDispatch<any, undefined, AnyAction>> = api => {
     let websocketConn: Conn;
@@ -26,68 +31,119 @@ const websocketMiddleware: Middleware<{}, any, Dispatch<AnyAction> & ThunkDispat
                     reconnect: 1000,
                 };
 
-                websocketConn = await dial(`${process.env.REACT_APP_GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/`.replace("http", "ws"), {
-                    "catan": {
+                websocketConn = await dial(`${process.env.REACT_APP_API_URL?? ""}/websocket/`, {
+                    [Namespace.Catan]: {
+                        [OnNamespaceConnect]: () => {
+                            (async() => {
+                                await i18n.loadNamespaces("notification");
+
+                                const translatedDetail = i18n.t("notification:connecting-to-namespace", {namespace: Namespace.Catan});
+    
+                                api.dispatch( 
+                                    addNotification({
+                                        type: NotificationType.Info,
+                                        detail: translatedDetail,
+                                    })
+                                );
+                            })()
+                        },
+                        [OnNamespaceConnected]: (nsConn: NSConn) => {
+                            (async() => {
+                                await i18n.loadNamespaces("notification");
+
+                                let translatedDetail = "";
+                                if (nsConn.conn.wasReconnected()) {
+                                    translatedDetail = i18n.t("notification:reconnected-to-namespace", {namespace: Namespace.Catan});
+                                } else {
+                                    translatedDetail = i18n.t("notification:connected-to-namespace", {namespace: Namespace.Catan});
+                                }
+    
+                                api.dispatch( 
+                                    addNotification({
+                                        type: NotificationType.Success,
+                                        detail: translatedDetail,
+                                    })
+                                );
+                            })();                            
+                        },
+                        [OnNamespaceDisconnect]: () => {
+                            (async() => {
+                                await i18n.loadNamespaces("notification");
+
+                                const translatedDetail = i18n.t("notification:disconnected-from-namespace", {namespace: Namespace.Catan});
+    
+                                api.dispatch( 
+                                    addNotification({
+                                        type: NotificationType.Error,
+                                        detail: translatedDetail,
+                                    })
+                                );
+                            })();
+                        },
                         [OnAnyEvent]: (nsConn: NSConn, message: Message) => {
                             if (isSystemEvent(message.Event || "")) {
                                 return null;
                             }
+
+                            const catanMessage: CatanMessage = message.unmarshal();
     
                             switch (message.Event) {
-                                case "player-created-game":
-                                    api.dispatch(catanAPI.util.invalidateTags(["Games"]));
+                                case "GameCreated":
+                                    api.dispatch(catanAPI.util.invalidateTags(["Game"]));
                                     break;
                                 default:
-                                    api.dispatch(catanAPI.util.invalidateTags([{type: "Games", id: message.Room}]));
+                                    api.dispatch(catanAPI.util.invalidateTags([{type: "GameDetail", id: message.Room}]));
                                     break;
                             }
 
                             (async() => {
                                 await i18n.loadNamespaces("notification");
                             
-                                const result = await api.dispatch(userAPI.endpoints.getUser.initiate(message.Body || ""));
+                                const result = await api.dispatch(userAPI.endpoints.getUser.initiate(catanMessage.userID));
         
                                 const translatedDetail = ((event?: string, playerName?: string) => {
                                     switch (event) {
-                                        case "player-created-game":
+                                        case "GameCreated":
                                             return i18n.t("notification:player-created-game", {player: playerName});
-                                        case "player-joined-game":
+                                        case "GameJoined":
                                             return i18n.t("notification:player-joined-game", {player: playerName});
-                                        case "player-started-game":
+                                        case "GameStarted":
                                             return i18n.t("notification:player-started-game", {player: playerName});
-                                        case "player-built-settlement-and-road":
+                                        case "SettlementAndRoadBuilt":
                                             return i18n.t("notification:player-built-settlement-and-road", {player: playerName});
-                                        case "player-rolled-dices":
+                                        case "DicesRolled":
                                             return i18n.t("notification:player-rolled-dices", {player: playerName});
-                                        case "player-moved-robber":
+                                        case "ResourceCardsDiscarded":
+                                                return i18n.t("notification:player-discarded-resource-cards", {player: playerName});
+                                        case "RobberMoved":
                                             return i18n.t("notification:player-moved-robber", {player: playerName});
-                                        case "player-ended-turn":
+                                        case "TurnEnded":
                                             return i18n.t("notification:player-ended-turn", {player: playerName});
-                                        case "player-built-settlement":
+                                        case "SettlementBuilt":
                                             return i18n.t("notification:player-built-settlement", {player: playerName});
-                                        case "player-built-road":
+                                        case "RoadBuilt":
                                             return i18n.t("notification:player-built-road", {player: playerName});
-                                        case "player-upgraded-city":
+                                        case "CityUpgraded":
                                             return i18n.t("notification:player-upgraded-city", {player: playerName});
-                                        case "player-bought-development-card":
+                                        case "DevelopmentCardBought":
                                             return i18n.t("notification:player-bought-development-card", {player: playerName});
-                                        case "player-toggled-resource-cards":
+                                        case "ResourceCardsToggled":
                                             return i18n.t("notification:player-toggled-resource-cards", {player: playerName});
-                                        case "player-traded-with-maritime":
+                                        case "MaritimeTraded":
                                             return i18n.t("notification:player-traded-with-maritime", {player: playerName});
-                                        case "player-sent-trade-offer":
+                                        case "TradeOfferSent":
                                             return i18n.t("notification:player-sent-trade-offer", {player: playerName});
-                                        case "player-confirmed-trade-offer":
+                                        case "TradeOfferConfirmed":
                                             return i18n.t("notification:player-confirmed-trade-offer", {player: playerName});
-                                        case "player-cancelled-trade-offer":
+                                        case "TradeOfferCancelled":
                                             return i18n.t("notification:player-cancelled-trade-offer", {player: playerName});
-                                        case "player-played-knight-card":
+                                        case "KnightCardPlayed":
                                             return i18n.t("notification:player-played-knight-card", {player: playerName});
-                                        case "player-played-road-building-card":
+                                        case "RoadBuildingCardPlayed":
                                             return i18n.t("notification:player-played-road-building-card", {player: playerName});
-                                        case "player-played-year-of-plenty-card":
+                                        case "YearOfPlentyCardPlayed":
                                             return i18n.t("notification:player-played-year-of-plenty-card", {player: playerName});
-                                        case "player-played-monopoly-card":
+                                        case "MonopolyCardPlayed":
                                             return i18n.t("notification:player-played-monopoly-card", {player: playerName});
                                     }
         
@@ -103,8 +159,55 @@ const websocketMiddleware: Middleware<{}, any, Dispatch<AnyAction> & ThunkDispat
                             })()
                         },
                     },
-                    "chat": {
-                        "message-created": (nsConn: NSConn, message: Message) => {
+                    [Namespace.Chat]: {
+                        [OnNamespaceConnect]: () => {
+                            (async() => {
+                                await i18n.loadNamespaces("notification");
+
+                                const translatedDetail = i18n.t("notification:connecting-to-namespace", {namespace: Namespace.Chat});
+    
+                                api.dispatch( 
+                                    addNotification({
+                                        type: NotificationType.Info,
+                                        detail: translatedDetail,
+                                    })
+                                );
+                            })()
+                        },
+                        [OnNamespaceConnected]: (nsConn: NSConn) => {
+                            (async() => {
+                                await i18n.loadNamespaces("notification");
+
+                                let translatedDetail = "";
+                                if (nsConn.conn.wasReconnected()) {
+                                    translatedDetail = i18n.t("notification:reconnected-to-namespace", {namespace: Namespace.Chat});
+                                } else {
+                                    translatedDetail = i18n.t("notification:connected-to-namespace", {namespace: Namespace.Chat});
+                                }
+    
+                                api.dispatch( 
+                                    addNotification({
+                                        type: NotificationType.Success,
+                                        detail: translatedDetail,
+                                    })
+                                );
+                            })();                            
+                        },
+                        [OnNamespaceDisconnect]: () => {
+                            (async() => {
+                                await i18n.loadNamespaces("notification");
+
+                                const translatedDetail = i18n.t("notification:disconnected-from-namespace", {namespace: Namespace.Chat});
+    
+                                api.dispatch( 
+                                    addNotification({
+                                        type: NotificationType.Error,
+                                        detail: translatedDetail,
+                                    })
+                                );
+                            })();
+                        },
+                        "MessageCreated": (nsConn: NSConn, message: Message) => {
                             const chatMessage: ChatMessage = message.unmarshal();
     
                             api.dispatch(chatAPI.util.updateQueryData("findMessages", message.Room || "", draft => {
@@ -136,9 +239,8 @@ const websocketMiddleware: Middleware<{}, any, Dispatch<AnyAction> & ThunkDispat
                 roomID = action.meta.arg.originalArgs;
             }
         }
-        
 
-        if (isAnyOf(catanAPI.endpoints.findAllGames.matchPending, catanAPI.endpoints.findAllGames.matchRejected)(action)) {
+        if (isAnyOf(catanAPI.endpoints.findGames.matchPending, catanAPI.endpoints.findGames.matchRejected)(action)) {
             websocketConn && websocketConn.connectedNamespaces.forEach(connectedNamespace => connectedNamespace.rooms?.forEach(room => room.leave()));
         }
 

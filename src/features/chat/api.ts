@@ -3,15 +3,10 @@ import { Mutex } from 'async-mutex';
 
 import { RootState } from 'app/store';
 import authApi from 'features/auth/api';
-
-export type Message = {
-    id: string;
-    userID: string;
-    detail: string;  
-};
+import { Message } from 'features/chat/types';
 
 const baseQuery = fetchBaseQuery({
-    baseUrl: `${process.env.REACT_APP_GATEWAY_ENDPOINT || (window.location.origin + "/api-gateway")}/api/v1/chat`, 
+    baseUrl: `${process.env.REACT_APP_API_URL?? ""}/api/v1/chat/messages`, 
     prepareHeaders: (headers, {getState}) => {
         const language = localStorage.getItem("i18nextLng");
         if (language) {
@@ -21,7 +16,7 @@ const baseQuery = fetchBaseQuery({
         const accessToken = (getState() as RootState).auth.accessToken;
         if (accessToken) {
             headers.set("Authorization", `Bearer ${accessToken}`);   
-        }        
+        }
         return headers;
     },
 });

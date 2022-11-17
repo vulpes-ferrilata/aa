@@ -1,8 +1,9 @@
-import React, { memo, useMemo } from 'react';
-import { Game } from 'features/catan/api';
+import React, { FunctionComponent, memo, useMemo } from 'react';
+
+import { GameDetail } from 'features/catan/types';
 
 interface IProps {
-    game: Game;
+    game: GameDetail;
     q: number;
     r: number;
     children: JSX.Element | JSX.Element[] | null;
@@ -13,14 +14,12 @@ type HexModel = {
     r: number;
 };
 
-function Hex(props: IProps) {
+const Hex: FunctionComponent<IProps> = (props: IProps) => {
     const hexes = useMemo(() => {
         const hexes: HexModel[] = [];
         for (let terrain of props.game.terrains) {
             hexes.push({q: terrain.q, r: terrain.r});
-            if (terrain.harbor) {
-                hexes.push({q: terrain.harbor.q, r: terrain.harbor.r});
-            }
+            terrain.harbor && hexes.push({q: terrain.harbor.q, r: terrain.harbor.r});
         }
         return hexes;
     }, [props.game]);

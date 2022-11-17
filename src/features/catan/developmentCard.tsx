@@ -1,49 +1,50 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { DevelopmentCardType } from 'features/catan/api';
+import React, { FunctionComponent, memo, useEffect, useMemo, useState } from 'react';
+
+import { DevelopmentCardType } from 'features/catan/types';
 
 export interface IProps {
     type: DevelopmentCardType;
 };
 
-function ResourceCard(props: IProps) {
+const DevelopmentCard: FunctionComponent<IProps> = (props: IProps) => {
     const [src, setSrc] = useState<string>();
     
     useEffect(() => {
         switch (props.type) {
-            case "KNIGHT":
-                import('assets/images/development-knight.png').then(image => setSrc(image.default));
+            case DevelopmentCardType.Knight:
+                import('assets/images/knight_development_card.png').then(image => setSrc(image.default));
                 break;
-            case "MONOPOLY":
-                import('assets/images/development-monopoly.png').then(image => setSrc(image.default));
+            case DevelopmentCardType.Monopoly:
+                import('assets/images/monopoly_development_card.png').then(image => setSrc(image.default));
                 break;
-            case "ROAD_BUILDING":
-                import('assets/images/development-road-building.png').then(image => setSrc(image.default));
+            case DevelopmentCardType.RoadBuiding:
+                import('assets/images/road_building_development_card.png').then(image => setSrc(image.default));
                 break;
-            case "YEAR_OF_PLENTY":
-                import('assets/images/development-year-of-plenty.png').then(image => setSrc(image.default));
+            case DevelopmentCardType.YearOfPlenty:
+                import('assets/images/year_of_plenty_development_card.png').then(image => setSrc(image.default));
                 break;
-            case "VICTORY_POINTS":
-                import('assets/images/development-library.png').then(image => setSrc(image.default));
+            case DevelopmentCardType.VictoryPoint:
+                import('assets/images/library_development_card.png').then(image => setSrc(image.default));
                 break;
-            case "HIDDEN":
-                import('assets/images/development-hidden.png').then(image => setSrc(image.default));
+            case DevelopmentCardType.Hidden:
+                import('assets/images/hidden_development_card.png').then(image => setSrc(image.default));
                 break;
         }
     }, [props.type])
 
     const alt = useMemo(() => {
         switch (props.type) {
-            case "KNIGHT":
+            case DevelopmentCardType.Knight:
                 return "knight development card";
-            case "MONOPOLY":
+            case DevelopmentCardType.Monopoly:
                 return "monopoly development card";
-            case "ROAD_BUILDING":
+            case DevelopmentCardType.RoadBuiding:
                 return "road building development card";
-            case "YEAR_OF_PLENTY":
+            case DevelopmentCardType.YearOfPlenty:
                 return "year of plenty development card";
-            case "VICTORY_POINTS":
+            case DevelopmentCardType.VictoryPoint:
                 return "victory point development card";
-            case "HIDDEN":
+            case DevelopmentCardType.Hidden:
                 return "hidden development card";
         }
     }, [props.type])
@@ -60,4 +61,4 @@ function ResourceCard(props: IProps) {
     );
 }
 
-export default ResourceCard;
+export default memo(DevelopmentCard);

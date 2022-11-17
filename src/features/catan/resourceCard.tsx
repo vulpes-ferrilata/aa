@@ -1,49 +1,50 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ResourceCardType } from 'features/catan/api';
+import React, { FunctionComponent, memo, useEffect, useMemo, useState } from 'react';
+
+import { ResourceCardType } from 'features/catan/types';
 
 interface IProps {
     type: ResourceCardType;
 };
 
-function ResourceCard(props: IProps) {
+const ResourceCard: FunctionComponent<IProps> = (props: IProps) => {
     const [src, setSrc] = useState<string>();
     
     useEffect(() => {
         switch (props.type) {
-            case "LUMBER":
-                import('assets/images/resource-lumber.png').then(image => setSrc(image.default));
+            case ResourceCardType.Lumber:
+                import('assets/images/lumber_resource_card.png').then(image => setSrc(image.default));
                 break;
-            case "BRICK":
-                import('assets/images/resource-brick.png').then(image => setSrc(image.default));
+            case ResourceCardType.Brick:
+                import('assets/images/brick_resource_card.png').then(image => setSrc(image.default));
                 break;
-            case "WOOL":
-                import('assets/images/resource-wool.png').then(image => setSrc(image.default));
+            case ResourceCardType.Wool:
+                import('assets/images/wool_resource_card.png').then(image => setSrc(image.default));
                 break;
-            case "GRAIN":
-                import('assets/images/resource-grain.png').then(image => setSrc(image.default));
+            case ResourceCardType.Grain:
+                import('assets/images/grain_resource_card.png').then(image => setSrc(image.default));
                 break;
-            case "ORE":
-                import('assets/images/resource-ore.png').then(image => setSrc(image.default));
+            case ResourceCardType.Ore:
+                import('assets/images/ore_resource_card.png').then(image => setSrc(image.default));
                 break;
-            case "HIDDEN":
-                import('assets/images/resource-hidden.png').then(image => setSrc(image.default));
+            case ResourceCardType.Hidden:
+                import('assets/images/hidden_resource_card.png').then(image => setSrc(image.default));
                 break;
         }
     }, [props.type]);
 
     const alt = useMemo(() => {
         switch (props.type) {
-            case "LUMBER":
+            case ResourceCardType.Lumber:
                 return "lumber resource card";
-            case "BRICK":
+            case ResourceCardType.Brick:
                 return "brick resource card";
-            case "WOOL":
+            case ResourceCardType.Wool:
                 return "wool resource card";
-            case "GRAIN":
+            case ResourceCardType.Grain:
                 return "grain resource card";
-            case "ORE":
+            case ResourceCardType.Ore:
                 return "ore resource card";
-            case "HIDDEN":
+            case ResourceCardType.Hidden:
                 return "hidden resource card";
         }
     }, [props.type]);
@@ -60,4 +61,4 @@ function ResourceCard(props: IProps) {
     );
 }
 
-export default ResourceCard;
+export default memo(ResourceCard);

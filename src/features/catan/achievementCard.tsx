@@ -1,29 +1,30 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { AchievementType } from 'features/catan/api';
+import React, { FunctionComponent, memo, useEffect, useMemo, useState } from 'react';
+
+import { AchievementType } from 'features/catan/types';
 
 interface IProps {
     type: AchievementType;
 };
 
-function ResourceCard(props: IProps) {
+const AchievementCard: FunctionComponent<IProps> = (props: IProps) => {
     const [src, setSrc] = useState<string>();
     
     useEffect(() => {
         switch (props.type) {
-            case "LONGEST_ROAD":
-                import('assets/images/achievement-longest-road.png').then(image => setSrc(image.default));
+            case AchievementType.LongestRoad:
+                import('assets/images/longest_road_achievement_card.png').then(image => setSrc(image.default));
                 break;
-            case "LARGEST_ARMY":
-                import('assets/images/achievement-largest-army.png').then(image => setSrc(image.default));
+            case AchievementType.LargestArmy:
+                import('assets/images/largest_army_achievement_card.png').then(image => setSrc(image.default));
                 break;
         }
     }, [props.type])
 
     const alt = useMemo(() => {
         switch (props.type) {
-            case "LONGEST_ROAD":
+            case AchievementType.LongestRoad:
                 return "longest road achievement card";
-            case "LARGEST_ARMY":
+            case AchievementType.LargestArmy:
                 return "largest army achievement card";
         }
     }, [props.type])
@@ -41,4 +42,4 @@ function ResourceCard(props: IProps) {
     );
 }
 
-export default ResourceCard;
+export default memo(AchievementCard);

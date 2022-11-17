@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { FunctionComponent, memo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
@@ -10,8 +10,8 @@ import {UserCircleIcon, EnvelopeIcon, KeyIcon} from '@heroicons/react/24/outline
 
 import { AppDispatch } from 'app/store';
 import { useRegisterMutation } from 'features/auth/api';
-import { addNotification, NotificationType } from 'features/notification/slice';
-import withMenubar from 'shared/hoc/withMenubar';
+import { addNotification } from 'features/notification/slice';
+import { NotificationType } from 'features/notification/types';
 
 interface IProps {};
 
@@ -22,7 +22,7 @@ type Form = {
     confirmPassword: string;
 };
 
-function Register(props: IProps) {
+const Register: FunctionComponent = (props: IProps) => {
     const {t} = useTranslation(["auth", "form", "notification"]);
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
@@ -30,7 +30,7 @@ function Register(props: IProps) {
 
     const [register] = useRegisterMutation();
 
-    const onSubmit: SubmitHandler<Form> = async data => {
+    const onSubmit: SubmitHandler<Form> = useCallback(async data => {
         await register({
             displayName: data.displayName,
             email: data.email,
@@ -45,7 +45,7 @@ function Register(props: IProps) {
         );
 
         navigate("/");
-    };
+    }, [register, dispatch, navigate, t]);
 
     return (
         <div className="m-auto p-8 rounded-md shadow-lg 
@@ -169,4 +169,4 @@ function Register(props: IProps) {
     );
 }
 
-export default withMenubar(memo(Register));
+export default memo(Register);

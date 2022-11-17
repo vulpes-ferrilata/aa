@@ -1,12 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-const enum LocalStorage {
-	ColorScheme = "COLOR_SCHEME"
-};
+import { ColorScheme } from 'features/colorScheme/types';
 
-export const enum ColorScheme {
-	Dark = "DARK",
-	Light = "LIGHT",
+export const enum LocalStorage {
+	ColorScheme = "ColorScheme"
 };
 
 const slice = createSlice({
