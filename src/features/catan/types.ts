@@ -139,7 +139,11 @@ export const enum DevelopmentCardType {
     RoadBuiding = "RoadBuilding",
     YearOfPlenty = "YearOfPlenty",
     Monopoly = "Monopoly",
-    VictoryPoint = "VictoryPoint",
+    Chapel = "Chapel",
+    GreatHall = "GreatHall",
+    Library = "Library",
+    Market = "Market",
+    University = "University",
     Hidden = "Hidden",
 };
 
@@ -230,33 +234,49 @@ export const enum PathLocation {
 };
 
 export class BuildSettlementAndRoad {
-    gameID?: string;
+    gameID: string;
     landID?: string;
     pathID?: string;
 
-    constructor(gameID?: string, landID?: string, pathID?: string) {
+    constructor(gameID: string, landID?: string, pathID?: string) {
         this.gameID = gameID;
         this.landID = landID;
         this.pathID = pathID;
     }
 }
 
+export class RollDices {
+    gameID: string;
+
+    constructor(gameID: string) {
+        this.gameID = gameID;
+    }
+}
+
+export class EndTurn {
+    gameID: string;
+    
+    constructor(gameID: string) {
+        this.gameID = gameID;
+    }
+}
+
 export class DiscardResourceCards {
-    gameID?: string;
+    gameID: string;
     resourceCardIDs?: string[];
 
-    constructor(gameID?: string, resourceCardIDs?: string[]) {
-        this.gameID = gameID
-        this.resourceCardIDs = resourceCardIDs
+    constructor(gameID: string, resourceCardIDs?: string[]) {
+        this.gameID = gameID;
+        this.resourceCardIDs = resourceCardIDs;
     }
 }
 
 export class MoveRobber {
-    gameID?: string;
+    gameID: string;
     terrainID?: string;
     playerID?: string;
 
-    constructor(gameID?: string, terrainID?: string, playerID?: string) {
+    constructor(gameID: string, terrainID?: string, playerID?: string) {
         this.gameID = gameID;
         this.terrainID = terrainID;
         this.playerID = playerID;
@@ -264,80 +284,82 @@ export class MoveRobber {
 }
 
 export class BuildSettlement {
-    gameID?: string;
+    gameID: string;
     landID?: string;
 
-    constructor(gameID?: string, landID?: string) {
+    constructor(gameID: string, landID?: string) {
         this.gameID = gameID;
         this.landID = landID;
     }
 }
 
 export class BuildRoad {
-    gameID?: string;
+    gameID: string;
     pathID?: string;
 
-    constructor(gameID?: string, pathID?: string) {
+    constructor(gameID: string, pathID?: string) {
         this.gameID = gameID;
         this.pathID = pathID;
     }
 }
 
 export class UpgradeCity {
-    gameID?: string;
+    gameID: string;
     constructionID?: string;
 
-    constructor(gameID?: string, constructionID?: string) {
+    constructor(gameID: string, constructionID?: string) {
         this.gameID = gameID;
         this.constructionID = constructionID;
     }
 }
 
 export class BuyDevelopmentCard {
-    gameID?: string;
+    gameID: string;
 
-    constructor(gameID?: string) {
+    constructor(gameID: string) {
         this.gameID = gameID;
     }
 }
 
 export class ToggleResourceCards {
-    gameID?: string;
+    gameID: string;
     resourceCardIDs?: string[];
 
-    constructor(gameID?: string, resourceCardIDs?: string[]) {
-        this.gameID = gameID
-        this.resourceCardIDs = resourceCardIDs
+    constructor(gameID: string, resourceCardIDs?: string[]) {
+        this.gameID = gameID;
+        this.resourceCardIDs = resourceCardIDs;
     }
 }
 
 export class MaritimeTrade {
-    gameID?: string;
+    gameID: string;
     resourceCardType?: ResourceCardType;
+    demandingResourceCardType?: ResourceCardType;
 
-    constructor(gameID?: string, resourceCardType?: ResourceCardType) {
-        this.gameID = gameID
-        this.resourceCardType = resourceCardType
+    constructor(gameID: string, resourceCardType?: ResourceCardType, demandingResourceCardType?: ResourceCardType) {
+        this.gameID = gameID;
+        this.resourceCardType = resourceCardType;
+        this.demandingResourceCardType = demandingResourceCardType;
     }
 }
 
 export class SendTradeOffer {
-    gameID?: string;
+    gameID: string;
     playerID?: string;
 
-    constructor(gameID?: string, playerID?: string) {
+    constructor(gameID: string, playerID?: string) {
         this.gameID = gameID
         this.playerID = playerID
     }
 }
 
 export class PlayKnightCard {
-    gameID?: string;
+    gameID: string;
     developmentCardID?: string;
     terrainID?: string;
     playerID?: string;
 
-    constructor(gameID?: string, developmentCardID?: string, terrainID?: string, playerID?: string) {
+    constructor(gameID: string, developmentCardID?: string, terrainID?: string, playerID?: string) {
         this.gameID = gameID;
         this.developmentCardID = developmentCardID;
         this.terrainID = terrainID;
@@ -346,11 +368,11 @@ export class PlayKnightCard {
 }
 
 export class PlayRoadBuildingCard {
-    gameID?: string;
+    gameID: string;
     developmentCardID?: string;
     pathIDs?: string[];
 
-    constructor(gameID?: string, developmentCardID?: string, pathIDs?: string[]) {
+    constructor(gameID: string, developmentCardID?: string, pathIDs?: string[]) {
         this.gameID = gameID;
         this.developmentCardID = developmentCardID;
         this.pathIDs = pathIDs;
@@ -358,27 +380,37 @@ export class PlayRoadBuildingCard {
 }
 
 export class PlayYearOfPlentyCard {
-    gameID?: string;
+    gameID: string;
     developmentCardID?: string;
-    resourceCardTypes?: ResourceCardType[];
+    demandingResourceCardTypes?: ResourceCardType[];
 
-    constructor(gameID?: string, developmentCardID?: string, resourceCardTypes?: ResourceCardType[]) {
+    constructor(gameID: string, developmentCardID?: string, demandingResourceCardTypes?: ResourceCardType[]) {
         this.gameID = gameID;
         this.developmentCardID = developmentCardID;
-        this.resourceCardTypes = resourceCardTypes;
+        this.demandingResourceCardTypes = demandingResourceCardTypes;
     }
 }
 
 export class PlayMonopolyCard {
-    gameID?: string;
+    gameID: string;
     developmentCardID?: string;
-    resourceCardType?: ResourceCardType;
+    demandingResourceCardType?: ResourceCardType;
 
-    constructor(gameID?: string, developmentCardID?: string, resourceCardType?: ResourceCardType) {
+    constructor(gameID: string, developmentCardID?: string, demandingResourceCardType?: ResourceCardType) {
         this.gameID = gameID;
         this.developmentCardID = developmentCardID;
-        this.resourceCardType = resourceCardType;
+        this.demandingResourceCardType = demandingResourceCardType;
     }
 }
 
-export type Action = BuildSettlementAndRoad | DiscardResourceCards | MoveRobber | BuildSettlement | BuildRoad | UpgradeCity | BuyDevelopmentCard | ToggleResourceCards | MaritimeTrade | SendTradeOffer | PlayKnightCard | PlayRoadBuildingCard | PlayYearOfPlentyCard | PlayMonopolyCard;
+export class PlayVictoryPointCard {
+    gameID: string;
+    developmentCardID?: string;
+
+    constructor(gameID: string, developmentCardID?: string) {
+        this.gameID = gameID;
+        this.developmentCardID = developmentCardID;
+    }
+}
+
+export type Action = BuildSettlementAndRoad | RollDices | EndTurn | DiscardResourceCards | MoveRobber | BuildSettlement | BuildRoad | UpgradeCity | BuyDevelopmentCard | ToggleResourceCards | MaritimeTrade | SendTradeOffer | PlayKnightCard | PlayRoadBuildingCard | PlayYearOfPlentyCard | PlayMonopolyCard | PlayVictoryPointCard;

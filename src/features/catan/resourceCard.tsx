@@ -1,62 +1,76 @@
-import React, { FunctionComponent, memo, useEffect, useMemo, useState } from 'react';
+import React, { FunctionComponent, memo, useMemo } from 'react';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 
 import { ResourceCardType } from 'features/catan/types';
+import LumberResourceCard from 'assets/images/lumber_resource_card.jpg';
+import LumberResourceCardPlaceholder from 'assets/images/lumber_resource_card_placeholder.jpg';
+import BrickResourceCard from 'assets/images/brick_resource_card.jpg';
+import BrickResourceCardPlaceholder from 'assets/images/brick_resource_card_placeholder.jpg';
+import WoolResourceCard from 'assets/images/wool_resource_card.jpg';
+import WoolResourceCardPlaceholder from 'assets/images/wool_resource_card_placeholder.jpg';
+import GrainResourceCard from 'assets/images/grain_resource_card.jpg';
+import GrainResourceCardPlaceholder from 'assets/images/grain_resource_card_placeholder.jpg';
+import OreResourceCard from 'assets/images/ore_resource_card.jpg';
+import OreResourceCardPlaceholder from 'assets/images/ore_resource_card_placeholder.jpg';
+import HiddenResourceCard from 'assets/images/hidden_resource_card.jpg';
+import HiddenResourceCardPlaceholder from 'assets/images/hidden_resource_card_placeholder.jpg';
+
 
 interface IProps {
     type: ResourceCardType;
 };
 
 const ResourceCard: FunctionComponent<IProps> = (props: IProps) => {
-    const [src, setSrc] = useState<string>();
-    
-    useEffect(() => {
+    const image = useMemo(() => {
         switch (props.type) {
             case ResourceCardType.Lumber:
-                import('assets/images/lumber_resource_card.png').then(image => setSrc(image.default));
-                break;
+                return (
+                    <LazyLoadImage
+                    src={LumberResourceCard}
+                    placeholderSrc={LumberResourceCardPlaceholder}
+                    alt="lumber resource card"/>
+                );
             case ResourceCardType.Brick:
-                import('assets/images/brick_resource_card.png').then(image => setSrc(image.default));
-                break;
+                return (
+                    <LazyLoadImage
+                    src={BrickResourceCard}
+                    placeholderSrc={BrickResourceCardPlaceholder}
+                    alt="brick resource card"/>
+                );
             case ResourceCardType.Wool:
-                import('assets/images/wool_resource_card.png').then(image => setSrc(image.default));
-                break;
+                return (
+                    <LazyLoadImage
+                    src={WoolResourceCard}
+                    placeholderSrc={WoolResourceCardPlaceholder}
+                    alt="wool resource card"/>
+                );
             case ResourceCardType.Grain:
-                import('assets/images/grain_resource_card.png').then(image => setSrc(image.default));
-                break;
+                return (
+                    <LazyLoadImage
+                    src={GrainResourceCard}
+                    placeholderSrc={GrainResourceCardPlaceholder}
+                    alt="grain resource card"/>
+                );
             case ResourceCardType.Ore:
-                import('assets/images/ore_resource_card.png').then(image => setSrc(image.default));
-                break;
+                return (
+                    <LazyLoadImage
+                    src={OreResourceCard}
+                    placeholderSrc={OreResourceCardPlaceholder}
+                    alt="ore resource card"/>
+                );
             case ResourceCardType.Hidden:
-                import('assets/images/hidden_resource_card.png').then(image => setSrc(image.default));
-                break;
+                return (
+                    <LazyLoadImage
+                    src={HiddenResourceCard}
+                    placeholderSrc={HiddenResourceCardPlaceholder}
+                    alt="hidden resource card"/>
+                );
         }
-    }, [props.type]);
-
-    const alt = useMemo(() => {
-        switch (props.type) {
-            case ResourceCardType.Lumber:
-                return "lumber resource card";
-            case ResourceCardType.Brick:
-                return "brick resource card";
-            case ResourceCardType.Wool:
-                return "wool resource card";
-            case ResourceCardType.Grain:
-                return "grain resource card";
-            case ResourceCardType.Ore:
-                return "ore resource card";
-            case ResourceCardType.Hidden:
-                return "hidden resource card";
-        }
-    }, [props.type]);
+    }, [props.type])
 
     return (
         <div className="h-full aspect-2/3">
-            {
-                src?
-                    <img src={src} alt={alt} className="max-h-full"/>
-                :
-                    <div className="w-full h-full bg-slate-100 animate-pulse"/>
-            }     
+            {image}
         </div>   
     );
 }

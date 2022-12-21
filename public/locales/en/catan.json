@@ -23,7 +23,12 @@
             "cancel-button": "Cancel",
             "confirm-button": "Confirm",
             "end-turn-button": "End Turn",
-            "confirm-trading-dialog": {
+            "maritime-trade-dialog": {
+                "title": "Maritime trade",
+                "cancel-button": "Cancel",
+                "confirm-button": "Confirm"
+            },
+            "confirm-trade-offer-dialog": {
                 "title": "Active player want to trade with you",
                 "cancel-button": "Cancel",
                 "confirm-button": "Confirm"

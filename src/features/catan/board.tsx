@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ArrowsPointingInIcon, ArrowsPointingOutIcon, BanknotesIcon, Cog6ToothIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon } from '@heroicons/react/24/outline';
 
-import { Action, GameDetail, Land as LandModel, Path as PathModel, Construction as ConstructionModel, Terrain as TerrainModel, BuyDevelopmentCard, ResourceCardType, Player, GamePhase, DevelopmentCardType, MaritimeTrade } from 'features/catan/types';
+import { Action, GameDetail, Land as LandModel, Path as PathModel, Construction as ConstructionModel, Terrain as TerrainModel, BuyDevelopmentCard, ResourceCardType, Player, DevelopmentCardType, MaritimeTrade, PlayMonopolyCard, PlayYearOfPlentyCard, RollDices } from 'features/catan/types';
 import AchievementCard from './achievementCard';
 import ResourceCard from './resourceCard';
 import DevelopmentCard from './developmentCard';
@@ -25,7 +25,8 @@ interface IProps {
     selectConstruction: (construction: ConstructionModel) => void;
     selectTerrain: (terrain: TerrainModel) => void;
     selectDevelopmentCard: () => void;
-    selectResourceCard: (resourceCardType: ResourceCardType) => void;
+    selectDemandingResourceCardType: (resourceCardType: ResourceCardType) => void;
+    selectResourceCardType: (resourceCardType: ResourceCardType) => void;
     confirmAction: () => void;
     cancelAction: () => void;
     endTurn: () => void;
@@ -75,33 +76,30 @@ const Board: FunctionComponent<IProps> = (props: IProps) => {
     }, []);
 
     return (
-        <div className="flex flex-col w-full h-full">
+        <div className="relative flex flex-col w-full h-full">
             <div className="flex h-1/6 rounded-md shadow-lg dark:bg-slate-800">
                 {
                     tab === Tab.Bank?
-                        <div className="flex-auto flex h-full p-2 overflow-y-hidden overflow-x-auto gap-4 transition-all">
+                        <div className="flex-auto flex h-full p-2 overflow-y-hidden overflow-x-auto gap-4 transition-flex-grow">
                             {Object.values(ResourceCardType).filter(resourceCardType => resourceCardType !== ResourceCardType.Hidden).map((resourceCardType, i) => (
-                                <div key={i} className={classNames("relative flex w-max h-full cursor-pointer", {
-                                    "animate-pulse": props.action instanceof MaritimeTrade && props.action.resourceCardType === resourceCardType,
-                                })}
-                                onClick={() => props.selectResourceCard(resourceCardType)}>
+                                <div key={i} className={classNames("relative h-full aspect-2/3 cursor-pointer", {
+                                    "animate-pulse": (props.action instanceof MaritimeTrade && props.action.demandingResourceCardType === resourceCardType) 
+                                                    || (props.action instanceof PlayMonopolyCard && props.action.demandingResourceCardType === resourceCardType) 
+                                                    || (props.action instanceof PlayYearOfPlentyCard && props.action.demandingResourceCardTypes?.includes(resourceCardType)),
+                                })} onClick={() => props.selectDemandingResourceCardType(resourceCardType)}>
                                     <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-xl">{props.game.resourceCards.reduce<number>((quantity, resourceCard) => resourceCard.type === resourceCardType? quantity + 1: quantity, 0)}</span>
 
-                                    <div className="h-full mx-auto overflow-hidden aspect-2/3">
-                                        <ResourceCard type={resourceCardType}/>
-                                    </div>
+                                    <ResourceCard type={resourceCardType}/>
                                 </div>
                             ))}
 
-                            <div className={classNames("relative flex w-max h-full cursor-pointer", {
+                            <div className={classNames("relative h-full aspect-2/3 cursor-pointer", {
                                 "animate-pulse":  props.action instanceof BuyDevelopmentCard,
                             })}
                             onClick={() => props.selectDevelopmentCard()}>
                                 <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-xl">{props.game.developmentCards.length}</span>
 
-                                <div className="h-full mx-auto overflow-hidden aspect-2/3">
-                                    <DevelopmentCard type={DevelopmentCardType.Hidden}/>
-                                </div>
+                                <DevelopmentCard type={DevelopmentCardType.Hidden}/>
                             </div>
 
                             {props.game.achievements.map(achievement => (
@@ -111,7 +109,7 @@ const Board: FunctionComponent<IProps> = (props: IProps) => {
                             ))}
                         </div>
                     :
-                        <div className="flex flex-col h-full aspect-square p-2 overflow-y-hidden overflow-x-auto transition-all cursor-pointer" onClick={() => setTab(Tab.Bank)}>
+                        <div className="flex flex-col h-full aspect-square p-2 overflow-y-hidden overflow-x-auto transition-flex-grow cursor-pointer" onClick={() => setTab(Tab.Bank)}>
                             <BanknotesIcon/>
                         </div>
                 }
@@ -120,7 +118,7 @@ const Board: FunctionComponent<IProps> = (props: IProps) => {
                 
                 {
                     tab === Tab.Config?
-                        <div className="flex-auto flex h-full p-2 overflow-y-hidden overflow-x-auto transition-all">
+                        <div className="flex-auto flex h-full p-2 overflow-y-hidden overflow-x-auto transition-flex-grow">
                             <div className="flex items-center justify-between w-full h-2/3 m-auto gap-4">
                                 <div className="flex items-center h-full">
                                     <MagnifyingGlassMinusIcon className="h-full cursor-pointer" onClick={() => zoomOut()}/>
@@ -142,10 +140,24 @@ const Board: FunctionComponent<IProps> = (props: IProps) => {
                             </div>
                         </div>
                     :
-                        <div className="flex-none flex flex-col h-full aspect-square p-2 overflow-y-hidden overflow-x-auto transition-all cursor-pointer" onClick={() => setTab(Tab.Config)}>
+                        <div className="flex-none flex flex-col h-full aspect-square p-2 overflow-y-hidden overflow-x-auto transition-flex-grow cursor-pointer" onClick={() => setTab(Tab.Config)}>
                             <Cog6ToothIcon/>
                         </div>
                 }
+            </div>
+
+            <div>
+                <div className={classNames("absolute flex gap-4 p-2 h-1/6 rounded-md shadow-lg transition-all z-10 dark:bg-slate-800", {
+                    "h-0 p-0": !(props.action instanceof MaritimeTrade),
+                })}>
+                    {Object.values(ResourceCardType).filter(resourceCardType => resourceCardType !== ResourceCardType.Hidden).map((resourceCardType, i) => (
+                        <div key={i} className={classNames("relative h-full aspect-2/3 cursor-pointer", {
+                            "animate-pulse": props.action instanceof MaritimeTrade && props.action.resourceCardType === resourceCardType,
+                        })} onClick={() => props.selectResourceCardType(resourceCardType)}>
+                            <ResourceCard type={resourceCardType}/>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             <div className="relative flex-auto overflow-auto">
@@ -179,7 +191,9 @@ const Board: FunctionComponent<IProps> = (props: IProps) => {
             </div>
 
             <div className="flex justify-between h-12 p-2">
-                <div className="flex gap-4 h-full w-fit cursor-pointer" onClick={() => props.selectDices()}>
+                <div className={classNames("flex gap-4 h-full w-fit cursor-pointer", {
+                    "animate-pulse": props.action instanceof RollDices,
+                })} onClick={() => props.selectDices()}>
                     {props.game.dices.map(dice => (
                         <div key={dice.id} className="h-full aspect-square">
                             <Dice game={props.game} dice={dice}/>
@@ -216,14 +230,13 @@ const Board: FunctionComponent<IProps> = (props: IProps) => {
                                     onClick={() => props.confirmAction()}/>                                    
                                 </> 
                         :
-                            props.game.activePlayer === props.me && props.game.phase === GamePhase.ResourceConsumption &&
-                                <input 
-                                type="button" 
-                                className="ml-auto px-2 py-1 rounded-md shadow-md bg-red-500 text-white cursor-pointer 
-                                hover:shadow-lg hover:bg-red-400 active:shadow-md active:bg-red-500 
-                                dark:bg-red-900 dark:hover:bg-red-800 dark:active:bg-red-900"
-                                value={t("game.started.end-turn-button")}
-                                onClick={() => props.endTurn()}/>
+                            <input 
+                            type="button" 
+                            className="ml-auto px-2 py-1 rounded-md shadow-md bg-red-500 text-white cursor-pointer 
+                            hover:shadow-lg hover:bg-red-400 active:shadow-md active:bg-red-500 
+                            dark:bg-red-900 dark:hover:bg-red-800 dark:active:bg-red-900"
+                            value={t("game.started.end-turn-button")}
+                            onClick={() => props.endTurn()}/>
                     }
                 </div>
             </div>

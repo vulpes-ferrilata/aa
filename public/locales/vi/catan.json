@@ -23,7 +23,12 @@
             "cancel-button": "Hủy",
             "confirm-button": "Xác nhận",
             "end-turn-button": "Kết thúc lượt",
-            "confirm-trading-dialog": {
+            "maritime-trade-dialog": {
+                "title": "Trao đổi hàng hải",
+                "cancel-button": "Hủy",
+                "confirm-button": "Xác nhận"
+            },
+            "confirm-trade-offer-dialog": {
                 "title": "Người chơi trong lượt muốn trao đổi với bạn",
                 "cancel-button": "Hủy",
                 "confirm-button": "Xác nhận"

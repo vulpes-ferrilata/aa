@@ -62,8 +62,8 @@ const api = createApi({
         getMe: builder.query<User, void>({
             query: () => ({
                 url: "/me",
-                method: "GET"
-            })
+                method: "GET",
+            }),
         }),
         getUser: builder.query<User, string>({
             query: (userID: string) => ({

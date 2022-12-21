@@ -11,15 +11,13 @@ module.exports = {
                 content: "0 1 content",
             },
             aspectRatio: {
-                hex: "1/1.1547005",
+                "hex": "1/1.1547005",
                 "2/3": "2/3",
                 "5/6": "5/6",
             },
             minWidth: {
                 "4": "1rem",
                 "16": "4rem",
-                "1/5": "20%",
-                "1/2": "50%",
             },
             maxWidth: {
                 "screen": "100vw"
@@ -34,10 +32,13 @@ module.exports = {
             },
             rotate: {
                 "120": "120deg",
-                "60": "60deg"
+                "60": "60deg",
             },
             boxShadow: {
                 "inner-lg": "inset 0 2px 4px 0 rgb(0 0 0 / 0.1)",
+            },
+            transitionProperty: {
+                "flex-grow": "flex-grow",
             },
             transitionDelay: {
                 "0": "0ms",

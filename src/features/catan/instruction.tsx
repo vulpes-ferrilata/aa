@@ -255,8 +255,12 @@ const Instruction: FunctionComponent<IProps> = (props: IProps) => {
                                 dark:shadow-white/10 dark:hover:bg-slate-700">
                                     <td className="px-2">
                                         <div className="flex h-16">
-                                            <div className="h-16 m-auto">
-                                                <DevelopmentCard type={DevelopmentCardType.VictoryPoint}/>
+                                            <div className="flex gap-2 h-16 m-auto">
+                                                <DevelopmentCard type={DevelopmentCardType.Chapel}/>
+                                                <DevelopmentCard type={DevelopmentCardType.GreatHall}/>
+                                                <DevelopmentCard type={DevelopmentCardType.Library}/>
+                                                <DevelopmentCard type={DevelopmentCardType.Market}/>
+                                                <DevelopmentCard type={DevelopmentCardType.University}/>
                                             </div>
                                         </div>
                                     </td>
@@ -337,8 +341,12 @@ const Instruction: FunctionComponent<IProps> = (props: IProps) => {
                                 dark:shadow-white/10 dark:hover:bg-slate-700">
                                     <td className="px-2">
                                         <div className="flex h-16">
-                                            <div className="h-16 m-auto">
-                                                <DevelopmentCard type={DevelopmentCardType.VictoryPoint}/>
+                                            <div className="flex gap-2 h-16 m-auto">
+                                                <DevelopmentCard type={DevelopmentCardType.Chapel}/>
+                                                <DevelopmentCard type={DevelopmentCardType.GreatHall}/>
+                                                <DevelopmentCard type={DevelopmentCardType.Library}/>
+                                                <DevelopmentCard type={DevelopmentCardType.Market}/>
+                                                <DevelopmentCard type={DevelopmentCardType.University}/>
                                             </div>
                                         </div>
                                     </td>

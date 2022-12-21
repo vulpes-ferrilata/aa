@@ -3,7 +3,7 @@ import { RootState } from 'app/store';
 import { Mutex } from 'async-mutex';
 
 import authApi from 'features/auth/api';
-import { BuildRoad, BuildSettlement, BuildSettlementAndRoad, BuyDevelopmentCard, DiscardResourceCards, FindGamesRequest, Game, GameCreated, GameDetail, MaritimeTrade, MoveRobber, Pagination, PlayKnightCard, PlayMonopolyCard, PlayRoadBuildingCard, PlayYearOfPlentyCard, SendTradeOffer, ToggleResourceCards, UpgradeCity } from './types';
+import { BuildRoad, BuildSettlement, BuildSettlementAndRoad, BuyDevelopmentCard, DiscardResourceCards, EndTurn, FindGamesRequest, Game, GameCreated, GameDetail, MaritimeTrade, MoveRobber, Pagination, PlayKnightCard, PlayMonopolyCard, PlayRoadBuildingCard, PlayVictoryPointCard, PlayYearOfPlentyCard, RollDices, SendTradeOffer, ToggleResourceCards, UpgradeCity } from './types';
 
 const baseQuery = fetchBaseQuery({
     baseUrl: `${process.env.REACT_APP_API_URL?? ""}/api/v1/catan/games`, 
@@ -15,7 +15,7 @@ const baseQuery = fetchBaseQuery({
 
         const accessToken = (getState() as RootState).auth.accessToken;
         if (accessToken) {
-            headers.set("authorization", `Bearer ${accessToken}`);   
+            headers.set("Authorization", `Bearer ${accessToken}`);   
         }
         
         return headers;
@@ -112,12 +112,12 @@ const api = createApi({
             }),
             invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
-        rollDices: builder.mutation<void, string>({
-            query: (gameID: string) => ({
-                url: `/${gameID}/roll-dices`,
+        rollDices: builder.mutation<void, RollDices>({
+            query: (rollDices: RollDices) => ({
+                url: `/${rollDices.gameID}/roll-dices`,
                 method: "POST",
             }),
-            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         discardResourceCards: builder.mutation<void, DiscardResourceCards>({
             query: (discardResourceCards: DiscardResourceCards) => ({
@@ -140,12 +140,12 @@ const api = createApi({
             }),
             invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
-        endTurn: builder.mutation<void, string>({
-            query: (gameID: string) => ({
-                url: `/${gameID}/end-turn`,
+        endTurn: builder.mutation<void, EndTurn>({
+            query: (endTurn: EndTurn) => ({
+                url: `/${endTurn.gameID}/end-turn`,
                 method: "POST",
             }),
-            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args}]
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
         }),
         buildSettlement: builder.mutation<void, BuildSettlement>({
             query: (buildSettlement: BuildSettlement) => ({
@@ -200,6 +200,7 @@ const api = createApi({
                 method: "POST",
                 body: {
                     resourceCardType: maritimeTrade.resourceCardType,
+                    demandingResourceCardType: maritimeTrade.demandingResourceCardType,
                 }
             }),
             invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
@@ -233,6 +234,7 @@ const api = createApi({
                 url: `/${playKnightCard.gameID}/play-knight-card`,
                 method: "POST",
                 body: {
+                    developmentCardID: playKnightCard.developmentCardID,
                     terrainID: playKnightCard.terrainID,
                     playerID: playKnightCard.playerID,
                 }
@@ -244,6 +246,7 @@ const api = createApi({
                 url: `/${playRoadBuildingCard.gameID}/play-road-building-card`,
                 method: "POST",
                 body: {
+                    developmentCardID: playRoadBuildingCard.developmentCardID,
                     pathIDs: playRoadBuildingCard.pathIDs,
                 }
             }),
@@ -254,7 +257,8 @@ const api = createApi({
                 url: `/${playYearOfPlentyCard.gameID}/play-year-of-plenty-card`,
                 method: "POST",
                 body: {
-                    resourceCardTypes: playYearOfPlentyCard.resourceCardTypes,
+                    developmentCardID: playYearOfPlentyCard.developmentCardID,
+                    demandingResourceCardTypes: playYearOfPlentyCard.demandingResourceCardTypes,
                 }
             }),            
             invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
@@ -264,7 +268,18 @@ const api = createApi({
                 url: `/${playMonopolyCard.gameID}/play-monopoly-card`,
                 method: "POST",
                 body: {
-                    resourceCardType: playMonopolyCard.resourceCardType,
+                    developmentCardID: playMonopolyCard.developmentCardID,
+                    demandingResourceCardType: playMonopolyCard.demandingResourceCardType,
+                }
+            }),
+            invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
+        }),
+        playVictoryPointCard: builder.mutation<void, PlayVictoryPointCard>({
+            query: (playVictoryPointCard: PlayVictoryPointCard) => ({
+                url: `/${playVictoryPointCard.gameID}/play-victory-point-card`,
+                method: "POST",
+                body: {
+                    developmentCardID: playVictoryPointCard.developmentCardID,
                 }
             }),
             invalidatesTags: (data, error, args) => [{type: "GameDetail", id: args.gameID}]
@@ -297,5 +312,6 @@ export const {
     usePlayKnightCardMutation,
     usePlayRoadBuildingCardMutation,
     usePlayYearOfPlentyCardMutation,
-    usePlayMonopolyCardMutation
+    usePlayMonopolyCardMutation,
+    usePlayVictoryPointCardMutation,
 } = api;

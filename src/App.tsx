@@ -4,9 +4,9 @@ import { useDispatch } from 'react-redux';
 
 import { connectWebsocket } from 'features/websocket/actions';
 import Loading from 'shared/components/loading';
+import Layout from 'shared/components/layout';
 
 const Toast = lazy(() => import('features/notification/toast'));
-const Layout = lazy(() => import('shared/components/layout'));
 const Menu = lazy(() => import('shared/components/menu'));
 const IndexPage = lazy(() => import('routes/index'));
 const LoginPage = lazy(() => import('routes/login'));
@@ -47,15 +47,14 @@ const App: FunctionComponent<IProps> = (props: IProps) => {
     }, [dispatch]);
     
     return (
-        <Suspense fallback={<Loading/>}>
-            <Toast/>
-
-            <Layout>
-                <Menu>
-                    {routes}
-                </Menu>
-            </Layout>
-        </Suspense>
+        <Layout>
+            <Suspense fallback={<Loading/>}>
+                <Toast/>
+                    <Menu>
+                        {routes}
+                    </Menu>
+            </Suspense>
+        </Layout>
     );
 }
 
