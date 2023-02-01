@@ -1,5 +1,5 @@
 import React, { useEffect, lazy, Suspense, FunctionComponent } from 'react';
-import { useRoutes } from 'react-router-dom';
+import { Navigate, useRoutes,  } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
 import { connectWebsocket } from 'features/websocket/actions';
@@ -8,11 +8,10 @@ import Layout from 'shared/components/layout';
 
 const Toast = lazy(() => import('features/notification/toast'));
 const Menu = lazy(() => import('shared/components/menu'));
-const IndexPage = lazy(() => import('routes/index'));
-const LoginPage = lazy(() => import('routes/login'));
-const RegisterPage = lazy(() => import('routes/register'));
-const LobbyPage = lazy(() => import('routes/catan/games/index'));
-const GamePage = lazy(() => import('routes/catan/games/[id]/index'));
+const LoginPage = lazy(() => import('pages/login'));
+const RegisterPage = lazy(() => import('pages/register'));
+const LobbyPage = lazy(() => import('pages/catan/lobby'));
+const GamePage = lazy(() => import('pages/catan/game'));
 
 interface IProps {}
 
@@ -22,7 +21,7 @@ const App: FunctionComponent<IProps> = (props: IProps) => {
     const routes = useRoutes([
             {
                 path: "/",
-                element: <IndexPage/>,
+                element: <Navigate to={"/catan/games"} replace={true}/>,
             },
             {
                 path:"/login", 

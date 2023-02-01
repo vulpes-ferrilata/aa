@@ -5,10 +5,10 @@ import Lobby from 'features/catan/lobby';
 
 interface IProps {}
 
-const GameLobbyPage: FunctionComponent<IProps> = (props: IProps) => {
+const LobbyPage: FunctionComponent<IProps> = (props: IProps) => {
     return (
         <Lobby/>
     );
 }
 
-export default withAuthentication(GameLobbyPage);
+export default withAuthentication(LobbyPage);

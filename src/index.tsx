@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import 'index.css';
 import 'i18n';
-import App from 'app';
+import App from 'App';
 import store from 'app/store';
 
 ReactDOM.render(
